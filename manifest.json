@@ -1,0 +1,9 @@
+{
+	"id": "vibe-writing",
+	"name": "Vibe Writing",
+	"version": "0.0.1",
+	"minAppVersion": "0.15.0",
+	"description": "Vibe Writing plugin for Obsidian",
+	"author": "Nilis None",
+	"isDesktopOnly": false
+}

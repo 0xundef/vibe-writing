@@ -1,0 +1,28 @@
+{
+	"name": "vibe-writing",
+	"version": "0.0.1",
+	"description": "Vibe Writing plugin for Obsidian",
+	"main": "main.js",
+	"scripts": {
+		"dev": "node esbuild.config.mjs",
+		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+		"version": "node version-bump.mjs && git add manifest.json versions.json"
+	},
+	"keywords": [],
+	"author": "nilisnone",
+	"license": "MIT",
+	"devDependencies": {
+		"@types/node": "^20.8.10",
+		"@typescript-eslint/eslint-plugin": "6.10.0",
+		"@typescript-eslint/parser": "6.10.0",
+		"builtin-modules": "3.3.0",
+		"esbuild": "^0.25.5",
+		"obsidian": "latest",
+		"tslib": "2.6.2",
+		"typescript": "5.2.2"
+	},
+	"dependencies": {
+		"openai": "^4.16.1",
+		"prettier": "^3.0.3"
+	}
+}
