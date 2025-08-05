@@ -59,9 +59,16 @@ A powerful AI assistant plugin for Obsidian that helps elevate your writing effi
 2. Use the command palette (Ctrl/Cmd + P) and search for "Compress Images in Current Note"
 3. The plugin will automatically find and compress all images in the note
 4. Images are compressed based on your configured quality and size settings
-5. Only images that achieve size reduction will be modified
+5. New compressed files are created with compression parameters in the filename
+6. The note content is automatically updated to reference the new compressed images
+7. Original images are preserved unchanged
 
-**Supported Image Formats**: JPG, JPEG, PNG, GIF, BMP, WebP
+**Filename Format**: `originalname_compressed_q80_max1920x1080_1280x720.jpg`
+- `q80`: Quality setting (80%)
+- `max1920x1080`: Maximum dimensions configured
+- `1280x720`: Actual dimensions of compressed image
+
+**Supported Image Formats**: JPG, JPEG, PNG, GIF, BMP, WebP (all converted to JPG)
 
 **Compression Settings**:
 - **Quality**: 0.1 (lowest) to 1.0 (highest quality)

@@ -288,7 +288,7 @@ export default class AiAssistantPlugin extends Plugin {
 			return;
 		}
 
-		const content = await this.app.vault.read(file);
+		let content = await this.app.vault.read(file);
 		const imageRegex = /!\[\[([^\]]+\.(jpg|jpeg|png|gif|bmp|webp))\]\]/gi;
 		const matches = Array.from(content.matchAll(imageRegex));
 
@@ -299,6 +299,7 @@ export default class AiAssistantPlugin extends Plugin {
 
 		let compressedCount = 0;
 		const totalImages = matches.length;
+		const replacements: { original: string; compressed: string }[] = [];
 
 		new Notice(`Found ${totalImages} images. Starting compression...`);
 
@@ -307,9 +308,10 @@ export default class AiAssistantPlugin extends Plugin {
 			try {
 				const imageFile = this.app.vault.getAbstractFileByPath(imagePath);
 				if (imageFile instanceof TFile) {
-					const compressed = await this.compressImage(imageFile);
-					if (compressed) {
+					const compressedPath = await this.compressImage(imageFile);
+					if (compressedPath) {
 						compressedCount++;
+						replacements.push({ original: imagePath, compressed: compressedPath });
 					}
 				}
 			} catch (error) {
@@ -317,10 +319,23 @@ export default class AiAssistantPlugin extends Plugin {
 			}
 		}
 
+		// Update note content with new compressed image paths
+		for (const replacement of replacements) {
+			content = content.replace(
+				new RegExp(`!\\[\\[${replacement.original.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\]\\]`, 'g'),
+				`![[${replacement.compressed}]]`
+			);
+		}
+
+		// Save updated content
+		if (replacements.length > 0) {
+			await this.app.vault.modify(file, content);
+		}
+
 		new Notice(`Compression complete! ${compressedCount}/${totalImages} images compressed.`);
 	}
 
-	async compressImage(file: TFile): Promise<boolean> {
+	async compressImage(file: TFile): Promise<string | null> {
 		try {
 			const arrayBuffer = await this.app.vault.readBinary(file);
 			const originalSize = arrayBuffer.byteLength;
@@ -332,7 +347,7 @@ export default class AiAssistantPlugin extends Plugin {
 
 			if (!ctx) {
 				console.error('Could not get canvas context');
-				return false;
+				return null;
 			}
 
 			return new Promise((resolve) => {
@@ -355,7 +370,7 @@ export default class AiAssistantPlugin extends Plugin {
 					// Convert to blob
 					canvas.toBlob(async (blob) => {
 						if (!blob) {
-							resolve(false);
+							resolve(null);
 							return;
 						}
 
@@ -363,23 +378,33 @@ export default class AiAssistantPlugin extends Plugin {
 						
 						// Only save if compression actually reduced file size
 						if (compressedSize < originalSize) {
+							// Generate new filename with compression parameters
+							const quality = Math.round(this.settings.imageCompressionQuality * 100);
+							const maxDim = `${this.settings.imageMaxWidth}x${this.settings.imageMaxHeight}`;
+							const actualDim = `${width}x${height}`;
+							
+							const fileExtension = file.extension;
+							const baseName = file.basename;
+							const newFileName = `${baseName}_compressed_q${quality}_max${maxDim}_${actualDim}.jpg`;
+							const newFilePath = file.path.replace(file.name, newFileName);
+
 							const compressedArrayBuffer = await blob.arrayBuffer();
-							await this.app.vault.modifyBinary(file, compressedArrayBuffer);
+							await this.app.vault.createBinary(newFilePath, compressedArrayBuffer);
 							
 							const savedBytes = originalSize - compressedSize;
 							const savedPercentage = ((savedBytes / originalSize) * 100).toFixed(1);
-							console.log(`Compressed ${file.name}: ${this.formatBytes(savedBytes)} saved (${savedPercentage}%)`);
-							resolve(true);
+							console.log(`Compressed ${file.name} -> ${newFileName}: ${this.formatBytes(savedBytes)} saved (${savedPercentage}%)`);
+							resolve(newFilePath);
 						} else {
 							console.log(`Skipped ${file.name}: no size reduction achieved`);
-							resolve(false);
+							resolve(null);
 						}
 					}, 'image/jpeg', this.settings.imageCompressionQuality);
 				};
 
 				img.onerror = () => {
 					console.error(`Failed to load image: ${file.name}`);
-					resolve(false);
+					resolve(null);
 				};
 
 				// Create blob URL from array buffer
@@ -388,7 +413,7 @@ export default class AiAssistantPlugin extends Plugin {
 			});
 		} catch (error) {
 			console.error(`Error compressing ${file.name}:`, error);
-			return false;
+			return null;
 		}
 	}
 
