@@ -10,3 +10,26 @@
     max-width: 100%;
     height: auto;
 }
+
+/* Vibe Writing Status Bar Styles */
+.vibe-writing-ready {
+    color: var(--text-success) !important;
+}
+
+.vibe-writing-processing {
+    color: var(--text-accent) !important;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.vibe-writing-error {
+    color: var(--text-error) !important;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}

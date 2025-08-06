@@ -271,14 +271,27 @@ class ImprovementSuggester extends SuggestModal<ImprovementOption> {
 		}
 
 		try {
+			// Update status to processing
+			this.plugin.updateStatusBar("Processing...");
+			
+			// Set up timeout for the API call
+			const timeoutMs = 30000; // 30 seconds timeout
+			const timeoutPromise = new Promise((_, reject) => {
+				setTimeout(() => reject(new Error('Request timeout')), timeoutMs);
+			});
+			
 			const prompt = `${option.prompt}\n\n${this.plugin.lastSelection.text}`;
 			console.log(prompt);
-			const answer = await this.plugin.aiAssistant.text_api_call([
+			
+			// Race between API call and timeout
+			const apiCallPromise = this.plugin.aiAssistant.text_api_call([
 				{
 					role: "user",
 					content: prompt,
 				},
 			]);
+			
+			const answer = await Promise.race([apiCallPromise, timeoutPromise]);
 
 			if (answer && this.plugin.lastSelection.editor) {
 			// Store the AI response for potential replacement
@@ -309,12 +322,28 @@ class ImprovementSuggester extends SuggestModal<ImprovementOption> {
 			};
 			
 			new Notice(`AI response added using ${option.name}!`);
+			// Update status to ready
+			this.plugin.updateStatusBar("Ready");
 		} else {
 			new Notice("Failed to get AI response. Please try again.");
+			// Update status to ready even on failure
+			this.plugin.updateStatusBar("Ready");
 		}
 		} catch (error) {
 			console.error("Error improving text:", error);
-			new Notice("Error occurred while improving text.");
+			
+			if (error.message === 'Request timeout') {
+				new Notice("AI request timed out. Please try again.");
+				this.plugin.updateStatusBar("Timeout");
+			} else {
+				new Notice("Error occurred while improving text.");
+				this.plugin.updateStatusBar("Error");
+			}
+			
+			// Reset to ready after 3 seconds
+			setTimeout(() => {
+				this.plugin.updateStatusBar("Ready");
+			}, 3000);
 		}
 	}
 }
@@ -326,6 +355,7 @@ export default class AiAssistantPlugin extends Plugin {
 		null;
 	lastAiResponse: string | null = null;
 	lastQuoteBlockRange: { from: any; to: any; editor: any } | null = null;
+	statusBarItem: HTMLElement | null = null;
 
 	build_api() {
 		if (this.settings.modelName.includes("claude")) {
@@ -377,9 +407,18 @@ export default class AiAssistantPlugin extends Plugin {
 			);
 
 			this.build_api();
-			console.log(
-				"✅ AI Assistant Plugin: API client built successfully",
-			);
+		console.log(
+			"✅ AI Assistant Plugin: API client built successfully",
+		);
+
+		// Add status bar item
+		this.statusBarItem = this.addStatusBarItem();
+		this.updateStatusBar("Initializing...");
+		
+		// Set to ready after initialization
+		setTimeout(() => {
+			this.updateStatusBar("Ready");
+		}, 100);
 
 			// Add command to improve previous selection with suggester
 			this.addCommand({
@@ -511,6 +550,22 @@ export default class AiAssistantPlugin extends Plugin {
 
 	onunload() {
 		console.log("🔌 AI Assistant Plugin: Unloaded!");
+	}
+
+	updateStatusBar(status: string) {
+		if (this.statusBarItem) {
+			this.statusBarItem.setText(`Vibe Writing: ${status}`);
+			
+			// Add visual styling based on status
+			this.statusBarItem.removeClass('vibe-writing-ready', 'vibe-writing-processing', 'vibe-writing-error');
+			if (status === 'Ready') {
+				this.statusBarItem.addClass('vibe-writing-ready');
+			} else if (status.includes('Processing') || status.includes('Initializing')) {
+				this.statusBarItem.addClass('vibe-writing-processing');
+			} else if (status.includes('Error') || status.includes('Timeout')) {
+				this.statusBarItem.addClass('vibe-writing-error');
+			}
+		}
 	}
 
 	async loadSettings() {
