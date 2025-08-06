@@ -34,6 +34,9 @@ interface AiAssistantSettings {
 	imgFolder: string;
 	language: string;
 	suggestions: ImprovementOption[];
+	imageCompressionQuality: number;
+	imageMaxWidth: number;
+	imageMaxHeight: number;
 }
 
 
@@ -51,6 +54,9 @@ const DEFAULT_SETTINGS: AiAssistantSettings = {
 	imgFolder: "AiAssistant/Assets",
 	language: "",
 	suggestions: [],
+	imageCompressionQuality: 0.8,
+	imageMaxWidth: 1920,
+	imageMaxHeight: 1080,
 };
 
 interface ImprovementOption {
@@ -433,8 +439,17 @@ export default class AiAssistantPlugin extends Plugin {
 					}
 
 					// Open suggester modal to choose improvement type
-					const suggester = new ImprovementSuggester(this.app, this);
-					suggester.open();
+			const suggester = new ImprovementSuggester(this.app, this);
+			suggester.open();
+		},
+	});
+
+			// Add command to compress images
+			this.addCommand({
+				id: "compress-images",
+				name: "Compress Images in Current Note",
+				callback: async () => {
+					await this.compressImagesInCurrentNote();
 				},
 			});
 
@@ -644,6 +659,171 @@ export default class AiAssistantPlugin extends Plugin {
 			};
 		}
 	}
+
+	async compressImagesInCurrentNote() {
+		const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
+		if (!activeView) {
+			new Notice("No active markdown view found.");
+			return;
+		}
+
+		const file = activeView.file;
+		if (!file) {
+			new Notice("No file is currently open.");
+			return;
+		}
+
+		let content = await this.app.vault.read(file);
+		const imageRegex = /!\[\[([^\]]+\.(jpg|jpeg|png|gif|bmp|webp))\]\]/gi;
+		const matches = Array.from(content.matchAll(imageRegex));
+
+		if (matches.length === 0) {
+			new Notice("No images found in the current note.");
+			return;
+		}
+
+		let compressedCount = 0;
+		const totalImages = matches.length;
+		const replacements: { original: string; compressed: string }[] = [];
+
+		new Notice(`Found ${totalImages} images. Starting compression...`);
+
+		for (const match of matches) {
+			const imagePath = match[1];
+			try {
+				const imageFile = this.app.vault.getAbstractFileByPath(imagePath);
+				if (imageFile instanceof TFile) {
+					const compressedPath = await this.compressImage(imageFile);
+					if (compressedPath) {
+						compressedCount++;
+						replacements.push({ original: imagePath, compressed: compressedPath });
+					}
+				}
+			} catch (error) {
+				console.error(`Error compressing image ${imagePath}:`, error);
+			}
+		}
+
+		// Update note content with new compressed image paths
+		for (const replacement of replacements) {
+			content = content.replace(
+				new RegExp(`!\\[\\[${replacement.original.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\]\\]`, 'g'),
+				`![[${replacement.compressed}]]`
+			);
+		}
+
+		// Save updated content
+		if (replacements.length > 0) {
+			await this.app.vault.modify(file, content);
+		}
+
+		new Notice(`Compression complete! ${compressedCount}/${totalImages} images compressed.`);
+	}
+
+	async compressImage(file: TFile): Promise<string | null> {
+		try {
+			const arrayBuffer = await this.app.vault.readBinary(file);
+			const originalSize = arrayBuffer.byteLength;
+
+			// Create image element
+			const img = new Image();
+			const canvas = document.createElement('canvas');
+			const ctx = canvas.getContext('2d');
+
+			if (!ctx) {
+				console.error('Could not get canvas context');
+				return null;
+			}
+
+			return new Promise((resolve) => {
+				img.onload = async () => {
+					// Calculate new dimensions
+					let { width, height } = this.calculateNewDimensions(
+						img.width,
+						img.height,
+						this.settings.imageMaxWidth,
+						this.settings.imageMaxHeight
+					);
+
+					// Set canvas dimensions
+					canvas.width = width;
+					canvas.height = height;
+
+					// Draw and compress
+					ctx.drawImage(img, 0, 0, width, height);
+
+					// Convert to blob
+					canvas.toBlob(async (blob) => {
+						if (!blob) {
+							resolve(null);
+							return;
+						}
+
+						const compressedSize = blob.size;
+						
+						// Only save if compression actually reduced file size
+						if (compressedSize < originalSize) {
+							// Generate new filename with compression parameters
+							const quality = Math.round(this.settings.imageCompressionQuality * 100);
+							const maxDim = `${this.settings.imageMaxWidth}x${this.settings.imageMaxHeight}`;
+							const actualDim = `${width}x${height}`;
+							
+							const fileExtension = file.extension;
+							const baseName = file.basename;
+							const newFileName = `${baseName}_compressed_q${quality}_max${maxDim}_${actualDim}.jpg`;
+							const newFilePath = file.path.replace(file.name, newFileName);
+
+							const compressedArrayBuffer = await blob.arrayBuffer();
+							await this.app.vault.createBinary(newFilePath, compressedArrayBuffer);
+							
+							const savedBytes = originalSize - compressedSize;
+							const savedPercentage = ((savedBytes / originalSize) * 100).toFixed(1);
+							console.log(`Compressed ${file.name} -> ${newFileName}: ${this.formatBytes(savedBytes)} saved (${savedPercentage}%)`);
+							resolve(newFilePath);
+						} else {
+							console.log(`Skipped ${file.name}: no size reduction achieved`);
+							resolve(null);
+						}
+					}, 'image/jpeg', this.settings.imageCompressionQuality);
+				};
+
+				img.onerror = () => {
+					console.error(`Failed to load image: ${file.name}`);
+					resolve(null);
+				};
+
+				// Create blob URL from array buffer
+				const blob = new Blob([arrayBuffer]);
+				img.src = URL.createObjectURL(blob);
+			});
+		} catch (error) {
+			console.error(`Error compressing ${file.name}:`, error);
+			return null;
+		}
+	}
+
+	calculateNewDimensions(originalWidth: number, originalHeight: number, maxWidth: number, maxHeight: number): { width: number; height: number } {
+		if (originalWidth <= maxWidth && originalHeight <= maxHeight) {
+			return { width: originalWidth, height: originalHeight };
+		}
+
+		const widthRatio = maxWidth / originalWidth;
+		const heightRatio = maxHeight / originalHeight;
+		const ratio = Math.min(widthRatio, heightRatio);
+
+		return {
+			width: Math.round(originalWidth * ratio),
+			height: Math.round(originalHeight * ratio)
+		};
+	}
+
+	formatBytes(bytes: number): string {
+		if (bytes === 0) return '0 Bytes';
+		const k = 1024;
+		const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+		const i = Math.floor(Math.log(bytes) / Math.log(k));
+		return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+	}
 }
 
 class AiAssistantSettingTab extends PluginSettingTab {
@@ -713,6 +893,58 @@ class AiAssistantSettingTab extends PluginSettingTab {
 					}),
 			);
 		containerEl.createEl("h3", { text: "Text Assistant" });
+
+		containerEl.createEl("h3", { text: "Image Compression" });
+
+		new Setting(containerEl)
+			.setName("Image Compression Quality")
+			.setDesc("Quality of compressed images (0.1 = lowest quality, 1.0 = highest quality)")
+			.addSlider((slider) =>
+				slider
+					.setLimits(0.1, 1.0, 0.1)
+					.setValue(this.plugin.settings.imageCompressionQuality)
+					.setDynamicTooltip()
+					.onChange(async (value) => {
+						this.plugin.settings.imageCompressionQuality = value;
+						await this.plugin.saveSettings();
+					})
+			);
+
+		new Setting(containerEl)
+			.setName("Maximum Image Width")
+			.setDesc("Maximum width for compressed images (pixels)")
+			.addText((text) =>
+				text
+					.setPlaceholder("1920")
+					.setValue(this.plugin.settings.imageMaxWidth.toString())
+					.onChange(async (value) => {
+						const intValue = parseInt(value);
+						if (!intValue || intValue <= 0) {
+							new Notice("Error: Please enter a valid positive number for max width");
+						} else {
+							this.plugin.settings.imageMaxWidth = intValue;
+							await this.plugin.saveSettings();
+						}
+					})
+			);
+
+		new Setting(containerEl)
+			.setName("Maximum Image Height")
+			.setDesc("Maximum height for compressed images (pixels)")
+			.addText((text) =>
+				text
+					.setPlaceholder("1080")
+					.setValue(this.plugin.settings.imageMaxHeight.toString())
+					.onChange(async (value) => {
+						const intValue = parseInt(value);
+						if (!intValue || intValue <= 0) {
+							new Notice("Error: Please enter a valid positive number for max height");
+						} else {
+							this.plugin.settings.imageMaxHeight = intValue;
+							await this.plugin.saveSettings();
+						}
+					})
+			);
 
 		new Setting(containerEl)
 			.setName("Model Name")

@@ -7,6 +7,7 @@ A powerful AI assistant plugin for Obsidian that helps elevate your writing effi
 - **Multi-AI Provider Support**: Works with OpenAI, Anthropic (Claude), and Qwen models
 - **Writing Improvement**: AI-powered text enhancement and suggestions
 - **Smart Selection**: Automatically captures and improves your text selections
+- **Image Compression**: Compress images in your notes to save storage space
 - **Flexible Configuration**: Customizable model settings and API configurations
 - **Seamless Integration**: Works natively within Obsidian's interface
 
@@ -33,6 +34,10 @@ A powerful AI assistant plugin for Obsidian that helps elevate your writing effi
    - **Model Name**: Choose from available AI models
    - **Max Tokens**: Set the maximum number of tokens for responses
    - **Qwen Base URL**: Custom endpoint (default: Alibaba Cloud)
+4. Configure image compression settings:
+   - **Image Compression Quality**: Set compression quality (0.1-1.0)
+   - **Maximum Image Width**: Set max width for compressed images
+   - **Maximum Image Height**: Set max height for compressed images
 
 ## Usage
 
@@ -46,6 +51,29 @@ A powerful AI assistant plugin for Obsidian that helps elevate your writing effi
 ### Available Commands
 
 - **AI: written improvement**: Improve selected text with AI assistance
+- **Compress Images in Current Note**: Compress all images referenced in the current note
+
+### Image Compression
+
+1. Open any note that contains images
+2. Use the command palette (Ctrl/Cmd + P) and search for "Compress Images in Current Note"
+3. The plugin will automatically find and compress all images in the note
+4. Images are compressed based on your configured quality and size settings
+5. New compressed files are created with compression parameters in the filename
+6. The note content is automatically updated to reference the new compressed images
+7. Original images are preserved unchanged
+
+**Filename Format**: `originalname_compressed_q80_max1920x1080_1280x720.jpg`
+- `q80`: Quality setting (80%)
+- `max1920x1080`: Maximum dimensions configured
+- `1280x720`: Actual dimensions of compressed image
+
+**Supported Image Formats**: JPG, JPEG, PNG, GIF, BMP, WebP (all converted to JPG)
+
+**Compression Settings**:
+- **Quality**: 0.1 (lowest) to 1.0 (highest quality)
+- **Max Width**: Maximum width in pixels (default: 1920px)
+- **Max Height**: Maximum height in pixels (default: 1080px)
 
 ## Supported AI Models
 
