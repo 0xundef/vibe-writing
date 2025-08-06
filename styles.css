@@ -25,11 +25,33 @@
     color: var(--text-error) !important;
 }
 
-@keyframes pulse {
-    0%, 100% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.6;
-    }
+/* AI Prompt Modal Styles */
+.ai-prompt-modal {
+    padding: 20px;
+}
+
+/* Response Area Styles */
+.response-area {
+    margin-top: 16px;
+    padding: 16px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 8px;
+    background-color: var(--background-secondary);
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.response-header {
+    font-weight: 600;
+    color: var(--text-accent);
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.response-content {
+    color: var(--text-normal);
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-family: var(--font-text);
 }

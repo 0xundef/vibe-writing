@@ -67,6 +67,122 @@ interface ImprovementOption {
 	hidden?: boolean;
 }
 
+class AIPromptModal extends Modal {
+	plugin: AiAssistantPlugin;
+	selectedText: string;
+	promptInput: HTMLInputElement;
+	responseArea: HTMLDivElement;
+
+	constructor(app: App, plugin: AiAssistantPlugin, selectedText: string = "") {
+		super(app);
+		this.plugin = plugin;
+		this.selectedText = selectedText;
+	}
+
+	onOpen() {
+		const { contentEl } = this;
+		contentEl.empty();
+		contentEl.addClass("ai-prompt-modal");
+
+		// Create prompt input
+		this.promptInput = this.contentEl.createEl("input", {
+			type: "text",
+			placeholder: "Enter your prompt here..."
+		});
+		this.promptInput.addClass("prompt-input");
+
+		// Create response area
+		this.responseArea = this.contentEl.createDiv();
+		this.responseArea.addClass("response-area");
+		this.responseArea.style.display = "none";
+
+		// Focus the input
+		setTimeout(() => {
+			this.promptInput.focus();
+		}, 100);
+
+		// Handle keyboard shortcuts
+		this.promptInput.addEventListener('keydown', (e) => {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				this.sendPrompt();
+			}
+			if (e.key === 'Escape') {
+				e.preventDefault();
+				this.close();
+			}
+		});
+	}
+
+	async sendPrompt() {
+		const prompt = this.promptInput.value.trim();
+		if (!prompt) {
+			new Notice("Please enter a prompt");
+			return;
+		}
+
+		// Show loading state
+		this.promptInput.disabled = true;
+		this.promptInput.placeholder = "Generating response...";
+
+		try {
+			// Build the prompt with selected text if available
+			let fullPrompt = prompt;
+			if (this.selectedText) {
+				fullPrompt = `${prompt}\n\nSelected text:\n${this.selectedText}`;
+			}
+
+			// Build the API client
+			this.plugin.build_api();
+			if (!this.plugin.aiAssistant) {
+				new Notice("API client not configured. Please check your settings.");
+				return;
+			}
+
+			// Make the API call
+			const messages = [{
+				role: "user",
+				content: fullPrompt
+			}];
+
+			const response = await this.plugin.aiAssistant.text_api_call(messages);
+			
+			if (response) {
+				this.displayResponse(response);
+			} else {
+				this.displayResponse("No response received from AI.");
+			}
+		} catch (error) {
+			console.error("AI API Error:", error);
+			this.displayResponse(`Error: ${error.message || "Failed to get AI response"}`);
+		} finally {
+			// Re-enable input
+			this.promptInput.disabled = false;
+			this.promptInput.placeholder = "Enter your prompt here...";
+			// Clear input for next prompt
+			this.promptInput.value = "";
+		}
+	}
+
+	displayResponse(response: string) {
+		this.responseArea.style.display = "block";
+		this.responseArea.empty();
+		
+		// Add response header
+		const header = this.responseArea.createEl("div", { text: "Response:" });
+		header.addClass("response-header");
+		
+		// Add response content
+		const content = this.responseArea.createEl("div", { text: response });
+		content.addClass("response-content");
+	}
+
+	onClose() {
+		const { contentEl } = this;
+		contentEl.empty();
+	}
+}
+
 class EditSuggestionModal extends Modal {
 	plugin: AiAssistantPlugin;
 	option: ImprovementOption;
@@ -484,6 +600,31 @@ export default class AiAssistantPlugin extends Plugin {
 						"Add New Prompt"
 					);
 					editModal.open();
+				},
+			});
+
+			// Add command to open edit modal
+			this.addCommand({
+				id: "open-edit-modal",
+				name: "Open Edit Modal",
+				callback: async () => {
+					const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
+					let initialContent = "";
+					
+					// If there's a text selection, use it as initial content
+					if (activeView && activeView.editor) {
+						const selection = activeView.editor.getSelection();
+						if (selection) {
+							initialContent = selection;
+						}
+					}
+					
+					const aiModal = new AIPromptModal(
+					this.app,
+					this,
+					initialContent
+				);
+				aiModal.open();
 				},
 			});
 
