@@ -65,12 +65,14 @@ class EditSuggestionModal extends Modal {
 	plugin: AiAssistantPlugin;
 	option: ImprovementOption;
 	onSave: (updatedOption: ImprovementOption) => void;
+	title: string;
 
-	constructor(app: App, plugin: AiAssistantPlugin, option: ImprovementOption, onSave: (updatedOption: ImprovementOption) => void) {
+	constructor(app: App, plugin: AiAssistantPlugin, option: ImprovementOption, onSave: (updatedOption: ImprovementOption) => void, title: string = "Edit Suggestion") {
 		super(app);
 		this.plugin = plugin;
 		this.option = { ...option }; // Create a copy
 		this.onSave = onSave;
+		this.title = title;
 	}
 
 	onOpen() {
@@ -78,7 +80,7 @@ class EditSuggestionModal extends Modal {
 		contentEl.empty();
 		contentEl.addClass("edit-suggestion-modal");
 
-		contentEl.createEl("h2", { text: "Edit Suggestion" });
+		contentEl.createEl("h2", { text: this.title });
 
 		// Name field
 		const nameContainer = contentEl.createDiv();
@@ -270,7 +272,7 @@ class ImprovementSuggester extends SuggestModal<ImprovementOption> {
 
 		try {
 			const prompt = `${option.prompt}\n\n${this.plugin.lastSelection.text}`;
-
+			console.log(prompt);
 			const answer = await this.plugin.aiAssistant.text_api_call([
 				{
 					role: "user",
@@ -279,16 +281,37 @@ class ImprovementSuggester extends SuggestModal<ImprovementOption> {
 			]);
 
 			if (answer && this.plugin.lastSelection.editor) {
-				// Replace the previous selection with the improved text
-				this.plugin.lastSelection.editor.replaceRange(
-					answer.trim(),
-					this.plugin.lastSelection.from,
-					this.plugin.lastSelection.to,
-				);
-				new Notice(`Text improved using ${option.name}!`);
-			} else {
-				new Notice("Failed to improve text. Please try again.");
-			}
+			// Store the AI response for potential replacement
+			this.plugin.lastAiResponse = answer.trim();
+			
+			// Create a toggle quote block with the AI response
+			const toggleQuoteBlock = `\n\n> [!quote]+ AI Response (${option.name})\n> ${answer.trim().replace(/\n/g, '\n> ')}`;
+			
+			// Insert the toggle quote block at the current cursor position
+			const cursor = this.plugin.lastSelection.editor.getCursor();
+			this.plugin.lastSelection.editor.replaceRange(
+				toggleQuoteBlock,
+				cursor,
+				cursor,
+			);
+			
+			// Store the quote block range for potential deletion (including leading newlines)
+			const quoteBlockStart = cursor;
+			const quoteBlockLines = toggleQuoteBlock.split('\n');
+			const quoteBlockEnd = {
+				line: quoteBlockStart.line + quoteBlockLines.length - 1,
+				ch: quoteBlockLines[quoteBlockLines.length - 1].length
+			};
+			this.plugin.lastQuoteBlockRange = {
+				from: quoteBlockStart,
+				to: quoteBlockEnd,
+				editor: this.plugin.lastSelection.editor
+			};
+			
+			new Notice(`AI response added using ${option.name}!`);
+		} else {
+			new Notice("Failed to get AI response. Please try again.");
+		}
 		} catch (error) {
 			console.error("Error improving text:", error);
 			new Notice("Error occurred while improving text.");
@@ -301,6 +324,8 @@ export default class AiAssistantPlugin extends Plugin {
 	aiAssistant: OpenAIAssistant;
 	lastSelection: { text: string; from: any; to: any; editor: any } | null =
 		null;
+	lastAiResponse: string | null = null;
+	lastQuoteBlockRange: { from: any; to: any; editor: any } | null = null;
 
 	build_api() {
 		if (this.settings.modelName.includes("claude")) {
@@ -374,6 +399,100 @@ export default class AiAssistantPlugin extends Plugin {
 				},
 			});
 
+			// Add command to create new prompt
+			this.addCommand({
+				id: "add-new-prompt",
+				name: "Add new prompt",
+				callback: async () => {
+					// Create a new empty prompt option
+					const newOption: ImprovementOption = {
+						id: Date.now().toString(), // Simple ID generation
+						name: "",
+						description: "",
+						prompt: ""
+					};
+
+					// Open edit modal for the new prompt
+					const editModal = new EditSuggestionModal(
+						this.app,
+						this,
+						newOption,
+						async (updatedOption: ImprovementOption) => {
+							// Only save if name and prompt are not empty
+							if (updatedOption.name.trim() && updatedOption.prompt.trim()) {
+								this.settings.suggestions.push(updatedOption);
+								await this.saveSettings();
+								new Notice(`New prompt "${updatedOption.name}" added successfully!`);
+							} else {
+								new Notice("Name and prompt cannot be empty!");
+							}
+						},
+						"Add New Prompt"
+					);
+					editModal.open();
+				},
+			});
+
+			// Add command to replace original text with last AI response
+			this.addCommand({
+				id: "replace-with-ai",
+				name: "Replace with last AI response",
+				callback: async () => {
+					if (!this.lastSelection) {
+						new Notice(
+							"No previous selection found. Please select some text first.",
+						);
+						return;
+					}
+
+					if (!this.lastAiResponse) {
+						new Notice(
+							"No AI response available. Please generate an AI response first.",
+						);
+						return;
+					}
+
+					if (!this.lastSelection.editor) {
+						new Notice("Editor not available.");
+						return;
+					}
+
+					// First delete the quote block if it exists
+					if (this.lastQuoteBlockRange && this.lastQuoteBlockRange.editor) {
+						this.lastQuoteBlockRange.editor.replaceRange(
+							"",
+							this.lastQuoteBlockRange.from,
+							this.lastQuoteBlockRange.to,
+						);
+						// Clear the quote block range after deletion
+						this.lastQuoteBlockRange = null;
+					}
+					
+					// Then replace the original text with the AI response
+					this.lastSelection.editor.replaceRange(
+						this.lastAiResponse,
+						this.lastSelection.from,
+						this.lastSelection.to,
+					);
+					
+					// Calculate the end position of the newly inserted text
+					const newTextEnd = {
+						line: this.lastSelection.from.line + this.lastAiResponse.split('\n').length - 1,
+						ch: this.lastAiResponse.split('\n').length === 1 
+							? this.lastSelection.from.ch + this.lastAiResponse.length
+							: this.lastAiResponse.split('\n').pop()?.length || 0
+					};
+					
+					// Select the newly inserted text to highlight it
+					this.lastSelection.editor.setSelection(
+						this.lastSelection.from,
+						newTextEnd
+					);
+					
+					new Notice("Text replaced with AI response!");
+				},
+			});
+
 			// Register event to capture text selections
 			this.registerDomEvent(document, "selectionchange", () => {
 				this.captureSelection();
@@ -381,9 +500,9 @@ export default class AiAssistantPlugin extends Plugin {
 
 			this.addSettingTab(new AiAssistantSettingTab(this.app, this));
 
-			console.log(
-				"🎉 AI Assistant Plugin: Successfully loaded with all commands and settings!",
-			);
+		console.log(
+			"🎉 AI Assistant Plugin: Successfully loaded with all commands and settings!",
+		);
 		} catch (error) {
 			console.error("❌ AI Assistant Plugin: Failed to load", error);
 			throw error;
@@ -391,7 +510,7 @@ export default class AiAssistantPlugin extends Plugin {
 	}
 
 	onunload() {
-		console.log("👋 AI Assistant Plugin: Unloading plugin...");
+		console.log("🔌 AI Assistant Plugin: Unloaded!");
 	}
 
 	async loadSettings() {
