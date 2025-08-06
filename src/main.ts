@@ -71,7 +71,7 @@ class AIPromptModal extends Modal {
 	plugin: AiAssistantPlugin;
 	selectedText: string;
 	promptInput: HTMLInputElement;
-	responseArea: HTMLDivElement;
+	responseArea: HTMLTextAreaElement;
 
 	constructor(app: App, plugin: AiAssistantPlugin, selectedText: string = "") {
 		super(app);
@@ -84,17 +84,28 @@ class AIPromptModal extends Modal {
 		contentEl.empty();
 		contentEl.addClass("ai-prompt-modal");
 
-		// Create prompt input
-		this.promptInput = this.contentEl.createEl("input", {
+		// contentEl.createEl("h2", { text: "AI Assistant" });
+
+		// Prompt field
+		const promptContainer = contentEl.createDiv();
+		// promptContainer.createEl("label", { text: "Prompt:" });
+		this.promptInput = promptContainer.createEl("input", {
 			type: "text",
 			placeholder: "Enter your prompt here..."
 		});
-		this.promptInput.addClass("prompt-input");
+		this.promptInput.style.width = "100%";
+		this.promptInput.style.marginBottom = "10px";
 
-		// Create response area
-		this.responseArea = this.contentEl.createDiv();
-		this.responseArea.addClass("response-area");
-		this.responseArea.style.display = "none";
+		// Response field
+		const responseContainer = contentEl.createDiv();
+		// responseContainer.createEl("label", { text: "Response:" });
+		this.responseArea = responseContainer.createEl("textarea");
+		this.responseArea.style.width = "100%";
+		this.responseArea.style.height = "200px";
+		this.responseArea.style.marginBottom = "20px";
+		this.responseArea.style.resize = "vertical";
+		this.responseArea.placeholder = "AI response will appear here...";
+		this.responseArea.readOnly = true;
 
 		// Focus the input
 		setTimeout(() => {
@@ -165,16 +176,7 @@ class AIPromptModal extends Modal {
 	}
 
 	displayResponse(response: string) {
-		this.responseArea.style.display = "block";
-		this.responseArea.empty();
-		
-		// Add response header
-		const header = this.responseArea.createEl("div", { text: "Response:" });
-		header.addClass("response-header");
-		
-		// Add response content
-		const content = this.responseArea.createEl("div", { text: response });
-		content.addClass("response-content");
+		this.responseArea.value = response;
 	}
 
 	onClose() {
