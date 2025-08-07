@@ -39,8 +39,6 @@ interface AiAssistantSettings {
 	imageMaxHeight: number;
 }
 
-
-
 const DEFAULT_SETTINGS: AiAssistantSettings = {
 	mySetting: "default",
 	openAIapiKey: "",
@@ -73,7 +71,11 @@ class AIPromptModal extends Modal {
 	promptInput: HTMLInputElement;
 	responseArea: HTMLTextAreaElement;
 
-	constructor(app: App, plugin: AiAssistantPlugin, selectedText: string = "") {
+	constructor(
+		app: App,
+		plugin: AiAssistantPlugin,
+		selectedText: string = "",
+	) {
 		super(app);
 		this.plugin = plugin;
 		this.selectedText = selectedText;
@@ -91,7 +93,7 @@ class AIPromptModal extends Modal {
 		// promptContainer.createEl("label", { text: "Prompt:" });
 		this.promptInput = promptContainer.createEl("input", {
 			type: "text",
-			placeholder: "Enter your prompt here..."
+			placeholder: "Enter your prompt here...",
 		});
 		this.promptInput.style.width = "100%";
 		this.promptInput.style.marginBottom = "10px";
@@ -113,12 +115,12 @@ class AIPromptModal extends Modal {
 		}, 100);
 
 		// Handle keyboard shortcuts
-		this.promptInput.addEventListener('keydown', (e) => {
-			if (e.key === 'Enter') {
+		this.promptInput.addEventListener("keydown", (e) => {
+			if (e.key === "Enter") {
 				e.preventDefault();
 				this.sendPrompt();
 			}
-			if (e.key === 'Escape') {
+			if (e.key === "Escape") {
 				e.preventDefault();
 				this.close();
 			}
@@ -146,18 +148,23 @@ class AIPromptModal extends Modal {
 			// Build the API client
 			this.plugin.build_api();
 			if (!this.plugin.aiAssistant) {
-				new Notice("API client not configured. Please check your settings.");
+				new Notice(
+					"API client not configured. Please check your settings.",
+				);
 				return;
 			}
 
 			// Make the API call
-			const messages = [{
-				role: "user",
-				content: fullPrompt
-			}];
+			const messages = [
+				{
+					role: "user",
+					content: fullPrompt,
+				},
+			];
 
-			const response = await this.plugin.aiAssistant.text_api_call(messages);
-			
+			const response =
+				await this.plugin.aiAssistant.text_api_call(messages);
+
 			if (response) {
 				this.displayResponse(response);
 			} else {
@@ -165,7 +172,9 @@ class AIPromptModal extends Modal {
 			}
 		} catch (error) {
 			console.error("AI API Error:", error);
-			this.displayResponse(`Error: ${error.message || "Failed to get AI response"}`);
+			this.displayResponse(
+				`Error: ${error.message || "Failed to get AI response"}`,
+			);
 		} finally {
 			// Re-enable input
 			this.promptInput.disabled = false;
@@ -192,7 +201,14 @@ class EditSuggestionModal extends Modal {
 	onDelete?: (optionId: string) => void;
 	title: string;
 
-	constructor(app: App, plugin: AiAssistantPlugin, option: ImprovementOption, onSave: (updatedOption: ImprovementOption) => void, onDelete?: (optionId: string) => void, title: string = "Edit Suggestion") {
+	constructor(
+		app: App,
+		plugin: AiAssistantPlugin,
+		option: ImprovementOption,
+		onSave: (updatedOption: ImprovementOption) => void,
+		onDelete?: (optionId: string) => void,
+		title: string = "Edit Suggestion",
+	) {
 		super(app);
 		this.plugin = plugin;
 		this.option = { ...option }; // Create a copy
@@ -250,12 +266,16 @@ class EditSuggestionModal extends Modal {
 		// Left side - Delete button (if onDelete callback provided)
 		const leftButtonContainer = buttonContainer.createDiv();
 		if (this.onDelete) {
-			const deleteButton = leftButtonContainer.createEl("button", { text: "Delete" });
+			const deleteButton = leftButtonContainer.createEl("button", {
+				text: "Delete",
+			});
 			deleteButton.style.backgroundColor = "var(--interactive-accent)";
 			deleteButton.style.color = "var(--text-on-accent)";
 			deleteButton.onclick = async () => {
 				// Confirm deletion
-				const confirmed = confirm(`Are you sure you want to delete the suggestion "${this.option.name}"?`);
+				const confirmed = confirm(
+					`Are you sure you want to delete the suggestion "${this.option.name}"?`,
+				);
 				if (confirmed && this.onDelete) {
 					this.onDelete(this.option.id);
 					this.close();
@@ -268,7 +288,9 @@ class EditSuggestionModal extends Modal {
 		rightButtonContainer.style.display = "flex";
 		rightButtonContainer.style.gap = "10px";
 
-		const saveButton = rightButtonContainer.createEl("button", { text: "Save" });
+		const saveButton = rightButtonContainer.createEl("button", {
+			text: "Save",
+		});
 		saveButton.onclick = async () => {
 			this.option.name = nameInput.value;
 			this.option.description = descInput.value;
@@ -297,7 +319,9 @@ class ImprovementSuggester extends SuggestModal<ImprovementOption> {
 	async onOpen() {
 		super.onOpen();
 		// Load suggestions from settings
-		this.options = this.plugin.settings.suggestions.filter(s => !s.hidden);
+		this.options = this.plugin.settings.suggestions.filter(
+			(s) => !s.hidden,
+		);
 
 		// Trigger rendering after loading
 		setTimeout(() => {
@@ -330,27 +354,32 @@ class ImprovementSuggester extends SuggestModal<ImprovementOption> {
 
 	renderSuggestion(option: ImprovementOption, el: HTMLElement) {
 		el.addClass("suggestion-item");
-		
+
 		// Create a container for the suggestion content
 		const contentContainer = el.createDiv({ cls: "suggestion-content" });
 		contentContainer.style.display = "flex";
 		contentContainer.style.justifyContent = "space-between";
 		contentContainer.style.alignItems = "center";
 		contentContainer.style.width = "100%";
-		
+
 		// Left side: suggestion info
-		const infoContainer = contentContainer.createDiv({ cls: "suggestion-info" });
+		const infoContainer = contentContainer.createDiv({
+			cls: "suggestion-info",
+		});
 		infoContainer.style.flex = "1";
-		infoContainer.createEl("div", { text: option.name, cls: "suggestion-title" });
+		infoContainer.createEl("div", {
+			text: option.name,
+			cls: "suggestion-title",
+		});
 		infoContainer.createEl("small", {
 			text: option.description,
 			cls: "suggestion-note",
 		});
-		
+
 		// Right side: edit button
 		const editButton = contentContainer.createEl("button", {
 			text: "edit",
-			cls: "suggestion-edit-btn"
+			cls: "suggestion-edit-btn",
 		});
 		editButton.style.marginLeft = "10px";
 		editButton.style.padding = "2px 8px";
@@ -360,16 +389,16 @@ class ImprovementSuggester extends SuggestModal<ImprovementOption> {
 		editButton.style.border = "none";
 		editButton.style.borderRadius = "4px";
 		editButton.style.cursor = "pointer";
-		
+
 		editButton.onclick = (e) => {
 			e.preventDefault();
 			e.stopPropagation();
 			this.openEditModal(option.id);
 		};
 	}
-	
+
 	openEditModal(optionId: string) {
-		const option = this.options.find(opt => opt.id === optionId);
+		const option = this.options.find((opt) => opt.id === optionId);
 		if (!option) return;
 		const editModal = new EditSuggestionModal(
 			this.app,
@@ -377,49 +406,62 @@ class ImprovementSuggester extends SuggestModal<ImprovementOption> {
 			option,
 			async (updatedOption: ImprovementOption) => {
 				// Update the option in the plugin settings
-				const index = this.plugin.settings.suggestions.findIndex(opt => opt.id === updatedOption.id);
+				const index = this.plugin.settings.suggestions.findIndex(
+					(opt) => opt.id === updatedOption.id,
+				);
 				if (index !== -1) {
 					this.plugin.settings.suggestions[index] = updatedOption;
 				}
-				
+
 				// Save settings
 				await this.plugin.saveSettings();
-				
+
 				// Update the current options array for display
-				this.options = this.plugin.settings.suggestions.filter(s => !s.hidden);
-				
+				this.options = this.plugin.settings.suggestions.filter(
+					(s) => !s.hidden,
+				);
+
 				// Refresh the suggester display
 				if (this.inputEl) {
 					this.inputEl.dispatchEvent(
 						new Event("input", { bubbles: true }),
 					);
 				}
-				
-				new Notice(`Suggestion "${updatedOption.name}" updated successfully!`);
+
+				new Notice(
+					`Suggestion "${updatedOption.name}" updated successfully!`,
+				);
 			},
 			async (deletedOptionId: string) => {
 				// Remove the suggestion from plugin settings
-				const index = this.plugin.settings.suggestions.findIndex(opt => opt.id === deletedOptionId);
+				const index = this.plugin.settings.suggestions.findIndex(
+					(opt) => opt.id === deletedOptionId,
+				);
 				if (index !== -1) {
-					const deletedOption = this.plugin.settings.suggestions[index];
+					const deletedOption =
+						this.plugin.settings.suggestions[index];
 					this.plugin.settings.suggestions.splice(index, 1);
-					
+
 					// Save settings to persist the deletion
 					await this.plugin.saveSettings();
-					
+
 					// Update the current options array for display
-					this.options = this.plugin.settings.suggestions.filter(s => !s.hidden);
-					
+					this.options = this.plugin.settings.suggestions.filter(
+						(s) => !s.hidden,
+					);
+
 					// Refresh the suggester display
 					if (this.inputEl) {
 						this.inputEl.dispatchEvent(
 							new Event("input", { bubbles: true }),
 						);
 					}
-					
-					new Notice(`Suggestion "${deletedOption.name}" deleted successfully!`);
+
+					new Notice(
+						`Suggestion "${deletedOption.name}" deleted successfully!`,
+					);
 				}
-			}
+			},
 		);
 		editModal.open();
 	}
@@ -438,16 +480,19 @@ class ImprovementSuggester extends SuggestModal<ImprovementOption> {
 		try {
 			// Update status to processing
 			this.plugin.updateStatusBar("Processing...");
-			
+
 			// Set up timeout for the API call
 			const timeoutMs = 30000; // 30 seconds timeout
 			const timeoutPromise = new Promise((_, reject) => {
-				setTimeout(() => reject(new Error('Request timeout')), timeoutMs);
+				setTimeout(
+					() => reject(new Error("Request timeout")),
+					timeoutMs,
+				);
 			});
-			
+
 			const prompt = `${option.prompt}\n\n${this.plugin.lastSelection.text}`;
 			console.log(prompt);
-			
+
 			// Race between API call and timeout
 			const apiCallPromise = this.plugin.aiAssistant.text_api_call([
 				{
@@ -455,56 +500,56 @@ class ImprovementSuggester extends SuggestModal<ImprovementOption> {
 					content: prompt,
 				},
 			]);
-			
+
 			const answer = await Promise.race([apiCallPromise, timeoutPromise]);
 
 			if (answer && this.plugin.lastSelection.editor) {
-			// Store the AI response for potential replacement
-			this.plugin.lastAiResponse = answer.trim();
-			
-			// Create a toggle quote block with the AI response
-			const toggleQuoteBlock = `\n\n> [!quote]+ AI Response (${option.name})\n> ${answer.trim().replace(/\n/g, '\n> ')}`;
-			
-			// Insert the toggle quote block at the current cursor position
-			const cursor = this.plugin.lastSelection.editor.getCursor();
-			this.plugin.lastSelection.editor.replaceRange(
-				toggleQuoteBlock,
-				cursor,
-				cursor,
-			);
-			
-			// Store the quote block range for potential deletion (including leading newlines)
-			const quoteBlockStart = cursor;
-			const quoteBlockLines = toggleQuoteBlock.split('\n');
-			const quoteBlockEnd = {
-				line: quoteBlockStart.line + quoteBlockLines.length - 1,
-				ch: quoteBlockLines[quoteBlockLines.length - 1].length
-			};
-			this.plugin.lastQuoteBlockRange = {
-				from: quoteBlockStart,
-				to: quoteBlockEnd,
-				editor: this.plugin.lastSelection.editor
-			};
-			
-			new Notice(`AI response added using ${option.name}!`);
-			// Update status to ready
-			this.plugin.updateStatusBar("Ready");
-		} else {
-			new Notice("Failed to get AI response. Please try again.");
-			// Update status to ready even on failure
-			this.plugin.updateStatusBar("Ready");
-		}
+				// Store the AI response for potential replacement
+				this.plugin.lastAiResponse = answer.trim();
+
+				// Create a toggle quote block with the AI response
+				const toggleQuoteBlock = `\n\n> [!quote]+ AI Response (${option.name})\n> ${answer.trim().replace(/\n/g, "\n> ")}`;
+
+				// Insert the toggle quote block at the current cursor position
+				const cursor = this.plugin.lastSelection.editor.getCursor();
+				this.plugin.lastSelection.editor.replaceRange(
+					toggleQuoteBlock,
+					cursor,
+					cursor,
+				);
+
+				// Store the quote block range for potential deletion (including leading newlines)
+				const quoteBlockStart = cursor;
+				const quoteBlockLines = toggleQuoteBlock.split("\n");
+				const quoteBlockEnd = {
+					line: quoteBlockStart.line + quoteBlockLines.length - 1,
+					ch: quoteBlockLines[quoteBlockLines.length - 1].length,
+				};
+				this.plugin.lastQuoteBlockRange = {
+					from: quoteBlockStart,
+					to: quoteBlockEnd,
+					editor: this.plugin.lastSelection.editor,
+				};
+
+				new Notice(`AI response added using ${option.name}!`);
+				// Update status to ready
+				this.plugin.updateStatusBar("Ready");
+			} else {
+				new Notice("Failed to get AI response. Please try again.");
+				// Update status to ready even on failure
+				this.plugin.updateStatusBar("Ready");
+			}
 		} catch (error) {
 			console.error("Error improving text:", error);
-			
-			if (error.message === 'Request timeout') {
+
+			if (error.message === "Request timeout") {
 				new Notice("AI request timed out. Please try again.");
 				this.plugin.updateStatusBar("Timeout");
 			} else {
 				new Notice("Error occurred while improving text.");
 				this.plugin.updateStatusBar("Error");
 			}
-			
+
 			// Reset to ready after 3 seconds
 			setTimeout(() => {
 				this.plugin.updateStatusBar("Ready");
@@ -552,9 +597,12 @@ export default class AiAssistantPlugin extends Plugin {
 
 		try {
 			await this.loadSettings();
-			
+
 			// Initialize suggestions if empty
-			if (!this.settings.suggestions || this.settings.suggestions.length === 0) {
+			if (
+				!this.settings.suggestions ||
+				this.settings.suggestions.length === 0
+			) {
 				this.settings.suggestions = this.getDefaultSuggestions();
 				await this.saveSettings();
 			}
@@ -572,18 +620,18 @@ export default class AiAssistantPlugin extends Plugin {
 			);
 
 			this.build_api();
-		console.log(
-			"✅ AI Assistant Plugin: API client built successfully",
-		);
+			console.log(
+				"✅ AI Assistant Plugin: API client built successfully",
+			);
 
-		// Add status bar item
-		this.statusBarItem = this.addStatusBarItem();
-		this.updateStatusBar("Initializing...");
-		
-		// Set to ready after initialization
-		setTimeout(() => {
-			this.updateStatusBar("Ready");
-		}, 100);
+			// Add status bar item
+			this.statusBarItem = this.addStatusBarItem();
+			this.updateStatusBar("Initializing...");
+
+			// Set to ready after initialization
+			setTimeout(() => {
+				this.updateStatusBar("Ready");
+			}, 100);
 
 			// Add command to improve previous selection with suggester
 			this.addCommand({
@@ -598,10 +646,10 @@ export default class AiAssistantPlugin extends Plugin {
 					}
 
 					// Open suggester modal to choose improvement type
-			const suggester = new ImprovementSuggester(this.app, this);
-			suggester.open();
-		},
-	});
+					const suggester = new ImprovementSuggester(this.app, this);
+					suggester.open();
+				},
+			});
 
 			// Add command to compress images
 			this.addCommand({
@@ -622,7 +670,7 @@ export default class AiAssistantPlugin extends Plugin {
 						id: Date.now().toString(), // Simple ID generation
 						name: "",
 						description: "",
-						prompt: ""
+						prompt: "",
 					};
 
 					// Open edit modal for the new prompt
@@ -632,16 +680,21 @@ export default class AiAssistantPlugin extends Plugin {
 						newOption,
 						async (updatedOption: ImprovementOption) => {
 							// Only save if name and prompt are not empty
-							if (updatedOption.name.trim() && updatedOption.prompt.trim()) {
+							if (
+								updatedOption.name.trim() &&
+								updatedOption.prompt.trim()
+							) {
 								this.settings.suggestions.push(updatedOption);
 								await this.saveSettings();
-								new Notice(`New prompt "${updatedOption.name}" added successfully!`);
+								new Notice(
+									`New prompt "${updatedOption.name}" added successfully!`,
+								);
 							} else {
 								new Notice("Name and prompt cannot be empty!");
 							}
 						},
 						undefined, // No delete callback for new prompts
-						"Add New Prompt"
+						"Add New Prompt",
 					);
 					editModal.open();
 				},
@@ -652,9 +705,10 @@ export default class AiAssistantPlugin extends Plugin {
 				id: "one-shot-chat",
 				name: "One shot chat",
 				callback: async () => {
-					const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
+					const activeView =
+						this.app.workspace.getActiveViewOfType(MarkdownView);
 					let initialContent = "";
-					
+
 					// If there's a text selection, use it as initial content
 					if (activeView && activeView.editor) {
 						const selection = activeView.editor.getSelection();
@@ -662,13 +716,13 @@ export default class AiAssistantPlugin extends Plugin {
 							initialContent = selection;
 						}
 					}
-					
+
 					const aiModal = new AIPromptModal(
-					this.app,
-					this,
-					initialContent
-				);
-				aiModal.open();
+						this.app,
+						this,
+						initialContent,
+					);
+					aiModal.open();
 				},
 			});
 
@@ -697,7 +751,10 @@ export default class AiAssistantPlugin extends Plugin {
 					}
 
 					// First delete the quote block if it exists
-					if (this.lastQuoteBlockRange && this.lastQuoteBlockRange.editor) {
+					if (
+						this.lastQuoteBlockRange &&
+						this.lastQuoteBlockRange.editor
+					) {
 						this.lastQuoteBlockRange.editor.replaceRange(
 							"",
 							this.lastQuoteBlockRange.from,
@@ -706,28 +763,34 @@ export default class AiAssistantPlugin extends Plugin {
 						// Clear the quote block range after deletion
 						this.lastQuoteBlockRange = null;
 					}
-					
+
 					// Then replace the original text with the AI response
 					this.lastSelection.editor.replaceRange(
 						this.lastAiResponse,
 						this.lastSelection.from,
 						this.lastSelection.to,
 					);
-					
+
 					// Calculate the end position of the newly inserted text
 					const newTextEnd = {
-						line: this.lastSelection.from.line + this.lastAiResponse.split('\n').length - 1,
-						ch: this.lastAiResponse.split('\n').length === 1 
-							? this.lastSelection.from.ch + this.lastAiResponse.length
-							: this.lastAiResponse.split('\n').pop()?.length || 0
+						line:
+							this.lastSelection.from.line +
+							this.lastAiResponse.split("\n").length -
+							1,
+						ch:
+							this.lastAiResponse.split("\n").length === 1
+								? this.lastSelection.from.ch +
+									this.lastAiResponse.length
+								: this.lastAiResponse.split("\n").pop()
+										?.length || 0,
 					};
-					
+
 					// Select the newly inserted text to highlight it
 					this.lastSelection.editor.setSelection(
 						this.lastSelection.from,
-						newTextEnd
+						newTextEnd,
 					);
-					
+
 					new Notice("Text replaced with AI response!");
 				},
 			});
@@ -739,9 +802,9 @@ export default class AiAssistantPlugin extends Plugin {
 
 			this.addSettingTab(new AiAssistantSettingTab(this.app, this));
 
-		console.log(
-			"🎉 AI Assistant Plugin: Successfully loaded with all commands and settings!",
-		);
+			console.log(
+				"🎉 AI Assistant Plugin: Successfully loaded with all commands and settings!",
+			);
 		} catch (error) {
 			console.error("❌ AI Assistant Plugin: Failed to load", error);
 			throw error;
@@ -755,15 +818,22 @@ export default class AiAssistantPlugin extends Plugin {
 	updateStatusBar(status: string) {
 		if (this.statusBarItem) {
 			this.statusBarItem.setText(`Vibe Writing: ${status}`);
-			
+
 			// Add visual styling based on status
-			this.statusBarItem.removeClass('vibe-writing-ready', 'vibe-writing-processing', 'vibe-writing-error');
-			if (status === 'Ready') {
-				this.statusBarItem.addClass('vibe-writing-ready');
-			} else if (status.includes('Processing') || status.includes('Initializing')) {
-				this.statusBarItem.addClass('vibe-writing-processing');
-			} else if (status.includes('Error') || status.includes('Timeout')) {
-				this.statusBarItem.addClass('vibe-writing-error');
+			this.statusBarItem.removeClass(
+				"vibe-writing-ready",
+				"vibe-writing-processing",
+				"vibe-writing-error",
+			);
+			if (status === "Ready") {
+				this.statusBarItem.addClass("vibe-writing-ready");
+			} else if (
+				status.includes("Processing") ||
+				status.includes("Initializing")
+			) {
+				this.statusBarItem.addClass("vibe-writing-processing");
+			} else if (status.includes("Error") || status.includes("Timeout")) {
+				this.statusBarItem.addClass("vibe-writing-error");
 			}
 		}
 	}
@@ -793,12 +863,10 @@ export default class AiAssistantPlugin extends Plugin {
 				If there is a grammar error, you should return the corrected text in markdown format.
 				Caution: Do not add any extra information, just return the corrected text directly.
 				The text need to be corrected:
-				`
-			}
+				`,
+			},
 		];
 	}
-
-
 
 	captureSelection() {
 		const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
@@ -853,12 +921,16 @@ export default class AiAssistantPlugin extends Plugin {
 		for (const match of matches) {
 			const imagePath = match[1];
 			try {
-				const imageFile = this.app.vault.getAbstractFileByPath(imagePath);
+				const imageFile =
+					this.app.vault.getAbstractFileByPath(imagePath);
 				if (imageFile instanceof TFile) {
 					const compressedPath = await this.compressImage(imageFile);
 					if (compressedPath) {
 						compressedCount++;
-						replacements.push({ original: imagePath, compressed: compressedPath });
+						replacements.push({
+							original: imagePath,
+							compressed: compressedPath,
+						});
 					}
 				}
 			} catch (error) {
@@ -869,8 +941,11 @@ export default class AiAssistantPlugin extends Plugin {
 		// Update note content with new compressed image paths
 		for (const replacement of replacements) {
 			content = content.replace(
-				new RegExp(`!\\[\\[${replacement.original.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\]\\]`, 'g'),
-				`![[${replacement.compressed}]]`
+				new RegExp(
+					`!\\[\\[${replacement.original.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\]\\]`,
+					"g",
+				),
+				`![[${replacement.compressed}]]`,
 			);
 		}
 
@@ -879,7 +954,9 @@ export default class AiAssistantPlugin extends Plugin {
 			await this.app.vault.modify(file, content);
 		}
 
-		new Notice(`Compression complete! ${compressedCount}/${totalImages} images compressed.`);
+		new Notice(
+			`Compression complete! ${compressedCount}/${totalImages} images compressed.`,
+		);
 	}
 
 	async compressImage(file: TFile): Promise<string | null> {
@@ -889,11 +966,11 @@ export default class AiAssistantPlugin extends Plugin {
 
 			// Create image element
 			const img = new Image();
-			const canvas = document.createElement('canvas');
-			const ctx = canvas.getContext('2d');
+			const canvas = document.createElement("canvas");
+			const ctx = canvas.getContext("2d");
 
 			if (!ctx) {
-				console.error('Could not get canvas context');
+				console.error("Could not get canvas context");
 				return null;
 			}
 
@@ -904,7 +981,7 @@ export default class AiAssistantPlugin extends Plugin {
 						img.width,
 						img.height,
 						this.settings.imageMaxWidth,
-						this.settings.imageMaxHeight
+						this.settings.imageMaxHeight,
 					);
 
 					// Set canvas dimensions
@@ -915,38 +992,59 @@ export default class AiAssistantPlugin extends Plugin {
 					ctx.drawImage(img, 0, 0, width, height);
 
 					// Convert to blob
-					canvas.toBlob(async (blob) => {
-						if (!blob) {
-							resolve(null);
-							return;
-						}
+					canvas.toBlob(
+						async (blob) => {
+							if (!blob) {
+								resolve(null);
+								return;
+							}
 
-						const compressedSize = blob.size;
-						
-						// Only save if compression actually reduced file size
-						if (compressedSize < originalSize) {
-							// Generate new filename with compression parameters
-							const quality = Math.round(this.settings.imageCompressionQuality * 100);
-							const maxDim = `${this.settings.imageMaxWidth}x${this.settings.imageMaxHeight}`;
-							const actualDim = `${width}x${height}`;
-							
-							const fileExtension = file.extension;
-							const baseName = file.basename;
-							const newFileName = `${baseName}_compressed_q${quality}_max${maxDim}_${actualDim}.jpg`;
-							const newFilePath = file.path.replace(file.name, newFileName);
+							const compressedSize = blob.size;
 
-							const compressedArrayBuffer = await blob.arrayBuffer();
-							await this.app.vault.createBinary(newFilePath, compressedArrayBuffer);
-							
-							const savedBytes = originalSize - compressedSize;
-							const savedPercentage = ((savedBytes / originalSize) * 100).toFixed(1);
-							console.log(`Compressed ${file.name} -> ${newFileName}: ${this.formatBytes(savedBytes)} saved (${savedPercentage}%)`);
-							resolve(newFilePath);
-						} else {
-							console.log(`Skipped ${file.name}: no size reduction achieved`);
-							resolve(null);
-						}
-					}, 'image/jpeg', this.settings.imageCompressionQuality);
+							// Only save if compression actually reduced file size
+							if (compressedSize < originalSize) {
+								// Generate new filename with compression parameters
+								const quality = Math.round(
+									this.settings.imageCompressionQuality * 100,
+								);
+								const maxDim = `${this.settings.imageMaxWidth}x${this.settings.imageMaxHeight}`;
+								const actualDim = `${width}x${height}`;
+
+								const fileExtension = file.extension;
+								const baseName = file.basename;
+								const newFileName = `${baseName}_compressed_q${quality}_max${maxDim}_${actualDim}.jpg`;
+								const newFilePath = file.path.replace(
+									file.name,
+									newFileName,
+								);
+
+								const compressedArrayBuffer =
+									await blob.arrayBuffer();
+								await this.app.vault.createBinary(
+									newFilePath,
+									compressedArrayBuffer,
+								);
+
+								const savedBytes =
+									originalSize - compressedSize;
+								const savedPercentage = (
+									(savedBytes / originalSize) *
+									100
+								).toFixed(1);
+								console.log(
+									`Compressed ${file.name} -> ${newFileName}: ${this.formatBytes(savedBytes)} saved (${savedPercentage}%)`,
+								);
+								resolve(newFilePath);
+							} else {
+								console.log(
+									`Skipped ${file.name}: no size reduction achieved`,
+								);
+								resolve(null);
+							}
+						},
+						"image/jpeg",
+						this.settings.imageCompressionQuality,
+					);
 				};
 
 				img.onerror = () => {
@@ -964,7 +1062,12 @@ export default class AiAssistantPlugin extends Plugin {
 		}
 	}
 
-	calculateNewDimensions(originalWidth: number, originalHeight: number, maxWidth: number, maxHeight: number): { width: number; height: number } {
+	calculateNewDimensions(
+		originalWidth: number,
+		originalHeight: number,
+		maxWidth: number,
+		maxHeight: number,
+	): { width: number; height: number } {
 		if (originalWidth <= maxWidth && originalHeight <= maxHeight) {
 			return { width: originalWidth, height: originalHeight };
 		}
@@ -975,16 +1078,16 @@ export default class AiAssistantPlugin extends Plugin {
 
 		return {
 			width: Math.round(originalWidth * ratio),
-			height: Math.round(originalHeight * ratio)
+			height: Math.round(originalHeight * ratio),
 		};
 	}
 
 	formatBytes(bytes: number): string {
-		if (bytes === 0) return '0 Bytes';
+		if (bytes === 0) return "0 Bytes";
 		const k = 1024;
-		const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+		const sizes = ["Bytes", "KB", "MB", "GB"];
 		const i = Math.floor(Math.log(bytes) / Math.log(k));
-		return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+		return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 	}
 }
 
@@ -1054,57 +1157,6 @@ class AiAssistantSettingTab extends PluginSettingTab {
 						this.plugin.build_api();
 					}),
 			);
-		containerEl.createEl("h3", { text: "Image" });
-
-		new Setting(containerEl)
-			.setName("Image Compression Quality")
-			.setDesc("Quality of compressed images (0.1 = lowest quality, 1.0 = highest quality)")
-			.addSlider((slider) =>
-				slider
-					.setLimits(0.1, 1.0, 0.1)
-					.setValue(this.plugin.settings.imageCompressionQuality)
-					.setDynamicTooltip()
-					.onChange(async (value) => {
-						this.plugin.settings.imageCompressionQuality = value;
-						await this.plugin.saveSettings();
-					})
-			);
-
-		new Setting(containerEl)
-			.setName("Maximum Image Width")
-			.setDesc("Maximum width for compressed images (pixels)")
-			.addText((text) =>
-				text
-					.setPlaceholder("1920")
-					.setValue(this.plugin.settings.imageMaxWidth.toString())
-					.onChange(async (value) => {
-						const intValue = parseInt(value);
-						if (!intValue || intValue <= 0) {
-							new Notice("Error: Please enter a valid positive number for max width");
-						} else {
-							this.plugin.settings.imageMaxWidth = intValue;
-							await this.plugin.saveSettings();
-						}
-					})
-			);
-
-		new Setting(containerEl)
-			.setName("Maximum Image Height")
-			.setDesc("Maximum height for compressed images (pixels)")
-			.addText((text) =>
-				text
-					.setPlaceholder("1080")
-					.setValue(this.plugin.settings.imageMaxHeight.toString())
-					.onChange(async (value) => {
-						const intValue = parseInt(value);
-						if (!intValue || intValue <= 0) {
-							new Notice("Error: Please enter a valid positive number for max height");
-						} else {
-							this.plugin.settings.imageMaxHeight = intValue;
-							await this.plugin.saveSettings();
-						}
-					})
-			);
 
 		new Setting(containerEl)
 			.setName("Model Name")
@@ -1135,6 +1187,64 @@ class AiAssistantSettingTab extends PluginSettingTab {
 							this.plugin.settings.maxTokens = int_value;
 							await this.plugin.saveSettings();
 							this.plugin.build_api();
+						}
+					}),
+			);
+
+		containerEl.createEl("h3", { text: "Image" });
+
+		new Setting(containerEl)
+			.setName("Image Compression Quality")
+			.setDesc(
+				"Quality of compressed images (0.1 = lowest quality, 1.0 = highest quality)",
+			)
+			.addSlider((slider) =>
+				slider
+					.setLimits(0.1, 1.0, 0.1)
+					.setValue(this.plugin.settings.imageCompressionQuality)
+					.setDynamicTooltip()
+					.onChange(async (value) => {
+						this.plugin.settings.imageCompressionQuality = value;
+						await this.plugin.saveSettings();
+					}),
+			);
+
+		new Setting(containerEl)
+			.setName("Maximum Image Width")
+			.setDesc("Maximum width for compressed images (pixels)")
+			.addText((text) =>
+				text
+					.setPlaceholder("1920")
+					.setValue(this.plugin.settings.imageMaxWidth.toString())
+					.onChange(async (value) => {
+						const intValue = parseInt(value);
+						if (!intValue || intValue <= 0) {
+							new Notice(
+								"Error: Please enter a valid positive number for max width",
+							);
+						} else {
+							this.plugin.settings.imageMaxWidth = intValue;
+							await this.plugin.saveSettings();
+						}
+					}),
+			);
+
+		new Setting(containerEl)
+			.setName("Maximum Image Height")
+			.setDesc("Maximum height for compressed images (pixels)")
+			.addText((text) =>
+				text
+					.setPlaceholder("1080")
+					.setValue(this.plugin.settings.imageMaxHeight.toString())
+					.onChange(async (value) => {
+						const intValue = parseInt(value);
+						if (!intValue || intValue <= 0) {
+							new Notice(
+								"Error: Please enter a valid positive number for max height",
+							);
+						} else {
+							this.plugin.settings.imageMaxHeight = intValue;
+							await this.plugin.saveSettings();
 						}
 					}),
 			);
