@@ -742,40 +742,17 @@ export default class AiAssistantPlugin extends Plugin {
 		return [
 			{
 				id: "general",
-				name: "General Improvement",
-				description: "Improve clarity, grammar, and overall quality",
-				prompt: "Please revise and improve the following text while maintaining its original meaning and intent. Focus on clarity, grammar, and overall quality:",
-			},
-			{
-				id: "formal",
-				name: "Make More Formal",
-				description: "Convert to formal, professional tone",
-				prompt: "Please rewrite the following text in a more formal and professional tone while maintaining its original meaning:",
-			},
-			{
-				id: "casual",
-				name: "Make More Casual",
-				description: "Convert to casual, conversational tone",
-				prompt: "Please rewrite the following text in a more casual and conversational tone while maintaining its original meaning:",
-			},
-			{
-				id: "concise",
-				name: "Make More Concise",
-				description: "Shorten while keeping key information",
-				prompt: "Please make the following text more concise and to the point while preserving all important information:",
-			},
-			{
-				id: "detailed",
-				name: "Add More Detail",
-				description: "Expand with additional context and examples",
-				prompt: "Please expand the following text with more detail, context, and examples while maintaining its core message:",
-			},
-			{
-				id: "academic",
-				name: "Academic Style",
-				description: "Convert to academic writing style",
-				prompt: "Please rewrite the following text in an academic writing style with appropriate scholarly tone and structure:",
-			},
+				name: "English Simple improvement",
+				description: "Typo and grammar correction",
+				prompt: `Help me to correct text, just focus on typo and grammar, format the corrected text as markdown,
+				initially I will send you text "This is an fish", you should return the corrected text "This is ~~an~~ a fish", which is a typo correction in markdown format.
+				"I want to 蹦极 "
+				If there is no typo or grammar error, just return the original text.
+				If there is a grammar error, you should return the corrected text in markdown format.
+				Caution: Do not add any extra information, just return the corrected text directly.
+				The text need to be corrected:
+				`
+			}
 		];
 	}
 
