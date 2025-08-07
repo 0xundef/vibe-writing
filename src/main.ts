@@ -189,13 +189,15 @@ class EditSuggestionModal extends Modal {
 	plugin: AiAssistantPlugin;
 	option: ImprovementOption;
 	onSave: (updatedOption: ImprovementOption) => void;
+	onDelete?: (optionId: string) => void;
 	title: string;
 
-	constructor(app: App, plugin: AiAssistantPlugin, option: ImprovementOption, onSave: (updatedOption: ImprovementOption) => void, title: string = "Edit Suggestion") {
+	constructor(app: App, plugin: AiAssistantPlugin, option: ImprovementOption, onSave: (updatedOption: ImprovementOption) => void, onDelete?: (optionId: string) => void, title: string = "Edit Suggestion") {
 		super(app);
 		this.plugin = plugin;
 		this.option = { ...option }; // Create a copy
 		this.onSave = onSave;
+		this.onDelete = onDelete;
 		this.title = title;
 	}
 
@@ -243,19 +245,35 @@ class EditSuggestionModal extends Modal {
 		const buttonContainer = contentEl.createDiv();
 		buttonContainer.style.display = "flex";
 		buttonContainer.style.gap = "10px";
-		buttonContainer.style.justifyContent = "flex-end";
+		buttonContainer.style.justifyContent = "space-between";
 
-		const saveButton = buttonContainer.createEl("button", { text: "Save" });
+		// Left side - Delete button (if onDelete callback provided)
+		const leftButtonContainer = buttonContainer.createDiv();
+		if (this.onDelete) {
+			const deleteButton = leftButtonContainer.createEl("button", { text: "Delete" });
+			deleteButton.style.backgroundColor = "var(--interactive-accent)";
+			deleteButton.style.color = "var(--text-on-accent)";
+			deleteButton.onclick = async () => {
+				// Confirm deletion
+				const confirmed = confirm(`Are you sure you want to delete the suggestion "${this.option.name}"?`);
+				if (confirmed && this.onDelete) {
+					this.onDelete(this.option.id);
+					this.close();
+				}
+			};
+		}
+
+		// Right side - Save button
+		const rightButtonContainer = buttonContainer.createDiv();
+		rightButtonContainer.style.display = "flex";
+		rightButtonContainer.style.gap = "10px";
+
+		const saveButton = rightButtonContainer.createEl("button", { text: "Save" });
 		saveButton.onclick = async () => {
 			this.option.name = nameInput.value;
 			this.option.description = descInput.value;
 			this.option.prompt = promptInput.value;
 			this.onSave(this.option);
-			this.close();
-		};
-
-		const cancelButton = buttonContainer.createEl("button", { text: "Cancel" });
-		cancelButton.onclick = () => {
 			this.close();
 		};
 	}
@@ -378,6 +396,29 @@ class ImprovementSuggester extends SuggestModal<ImprovementOption> {
 				}
 				
 				new Notice(`Suggestion "${updatedOption.name}" updated successfully!`);
+			},
+			async (deletedOptionId: string) => {
+				// Remove the suggestion from plugin settings
+				const index = this.plugin.settings.suggestions.findIndex(opt => opt.id === deletedOptionId);
+				if (index !== -1) {
+					const deletedOption = this.plugin.settings.suggestions[index];
+					this.plugin.settings.suggestions.splice(index, 1);
+					
+					// Save settings to persist the deletion
+					await this.plugin.saveSettings();
+					
+					// Update the current options array for display
+					this.options = this.plugin.settings.suggestions.filter(s => !s.hidden);
+					
+					// Refresh the suggester display
+					if (this.inputEl) {
+						this.inputEl.dispatchEvent(
+							new Event("input", { bubbles: true }),
+						);
+					}
+					
+					new Notice(`Suggestion "${deletedOption.name}" deleted successfully!`);
+				}
 			}
 		);
 		editModal.open();
@@ -564,8 +605,8 @@ export default class AiAssistantPlugin extends Plugin {
 
 			// Add command to compress images
 			this.addCommand({
-				id: "compress-images",
-				name: "Compress Images in Current Note",
+				id: "compress-image",
+				name: "Compress Image in Current Note",
 				callback: async () => {
 					await this.compressImagesInCurrentNote();
 				},
@@ -573,8 +614,8 @@ export default class AiAssistantPlugin extends Plugin {
 
 			// Add command to create new prompt
 			this.addCommand({
-				id: "add-new-prompt",
-				name: "Add new prompt",
+				id: "new-prompt",
+				name: "New prompt",
 				callback: async () => {
 					// Create a new empty prompt option
 					const newOption: ImprovementOption = {
@@ -599,6 +640,7 @@ export default class AiAssistantPlugin extends Plugin {
 								new Notice("Name and prompt cannot be empty!");
 							}
 						},
+						undefined, // No delete callback for new prompts
 						"Add New Prompt"
 					);
 					editModal.open();
@@ -607,8 +649,8 @@ export default class AiAssistantPlugin extends Plugin {
 
 			// Add command to open edit modal
 			this.addCommand({
-				id: "open-edit-modal",
-				name: "Open Edit Modal",
+				id: "one-shot-chat",
+				name: "One shot chat",
 				callback: async () => {
 					const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
 					let initialContent = "";
@@ -746,7 +788,7 @@ export default class AiAssistantPlugin extends Plugin {
 				description: "Typo and grammar correction",
 				prompt: `Help me to correct text, just focus on typo and grammar, format the corrected text as markdown,
 				initially I will send you text "This is an fish", you should return the corrected text "This is ~~an~~ a fish", which is a typo correction in markdown format.
-				"I want to 蹦极 "
+				"I like to eat 冰棍 " , you should return the corrected text "I like to eat ~~冰棍~~ popsicle /ˈpɑːp.sɪ.kəl/", the phonetic symbol is wrapped by two slashes.
 				If there is no typo or grammar error, just return the original text.
 				If there is a grammar error, you should return the corrected text in markdown format.
 				Caution: Do not add any extra information, just return the corrected text directly.
