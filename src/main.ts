@@ -1000,7 +1000,7 @@ class AiAssistantSettingTab extends PluginSettingTab {
 		const { containerEl } = this;
 
 		containerEl.empty();
-		containerEl.createEl("h2", { text: "Settings for my AI assistant." });
+		containerEl.createEl("h2", { text: "AI vendor" });
 
 		new Setting(containerEl).setName("OpenAI API Key").addText((text) =>
 			text
@@ -1054,9 +1054,7 @@ class AiAssistantSettingTab extends PluginSettingTab {
 						this.plugin.build_api();
 					}),
 			);
-		containerEl.createEl("h3", { text: "Text Assistant" });
-
-		containerEl.createEl("h3", { text: "Image Compression" });
+		containerEl.createEl("h3", { text: "Image" });
 
 		new Setting(containerEl)
 			.setName("Image Compression Quality")
