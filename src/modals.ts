@@ -1,6 +1,7 @@
 import { App, Modal, Notice } from "obsidian";
 import type AiAssistantPlugin from "./main";
 import { ImprovementOption } from "./types";
+import { translate } from "./i18n/language-manager";
 
 export class AIPromptModal extends Modal {
 	plugin: AiAssistantPlugin;
@@ -27,7 +28,7 @@ export class AIPromptModal extends Modal {
 		const promptContainer = contentEl.createDiv();
 		this.promptInput = promptContainer.createEl("input", {
 			type: "text",
-			placeholder: "Enter your prompt here...",
+			placeholder: translate('placeholder.prompt-input'),
 		});
 		this.promptInput.style.width = "100%";
 		this.promptInput.style.marginBottom = "10px";
@@ -39,7 +40,7 @@ export class AIPromptModal extends Modal {
 		this.responseArea.style.height = "200px";
 		this.responseArea.style.marginBottom = "20px";
 		this.responseArea.style.resize = "vertical";
-		this.responseArea.placeholder = "AI response will appear here...";
+		this.responseArea.placeholder = translate('placeholder.ai-response');
 		this.responseArea.readOnly = true;
 
 		// Focus the input
@@ -63,13 +64,13 @@ export class AIPromptModal extends Modal {
 	async sendPrompt() {
 		const prompt = this.promptInput.value.trim();
 		if (!prompt) {
-			new Notice("Please enter a prompt");
+			new Notice(translate('notice.enter-prompt'));
 			return;
 		}
 
 		// Show loading state
 		this.promptInput.disabled = true;
-		this.promptInput.placeholder = "Generating response...";
+		this.promptInput.placeholder = translate('placeholder.generating-response');
 
 		try {
 			// Build the prompt with selected text if available
@@ -82,7 +83,7 @@ export class AIPromptModal extends Modal {
 			this.plugin.build_api();
 			if (!this.plugin.aiAssistant) {
 				new Notice(
-					"API client not configured. Please check your settings.",
+					translate('notice.api-not-configured'),
 				);
 				return;
 			}
@@ -101,17 +102,17 @@ export class AIPromptModal extends Modal {
 			if (response) {
 				this.displayResponse(response);
 			} else {
-				this.displayResponse("No response received from AI.");
+				this.displayResponse(translate('message.no-response'));
 			}
 		} catch (error) {
 			console.error("AI API Error:", error);
 			this.displayResponse(
-				`Error: ${error.message || "Failed to get AI response"}`,
+				`${translate('error.prefix')}: ${error.message || translate('error.failed-ai-response')}`,
 			);
 		} finally {
 			// Re-enable input
 			this.promptInput.disabled = false;
-			this.promptInput.placeholder = "Enter your prompt here...";
+			this.promptInput.placeholder = translate('placeholder.prompt-input');
 			// Clear input for next prompt
 			this.promptInput.value = "";
 		}
@@ -155,11 +156,11 @@ export class EditSuggestionModal extends Modal {
 		contentEl.empty();
 		contentEl.addClass("edit-suggestion-modal");
 
-		contentEl.createEl("h2", { text: this.title });
+		contentEl.createEl("h2", { text: translate('modal.edit-suggestion') });
 
 		// Name field
 		const nameContainer = contentEl.createDiv();
-		nameContainer.createEl("label", { text: "Name:" });
+		nameContainer.createEl("label", { text: translate('ui.name') });
 		const nameInput = nameContainer.createEl("input", {
 			type: "text",
 			value: this.option.name,
@@ -169,7 +170,7 @@ export class EditSuggestionModal extends Modal {
 
 		// Description field
 		const descContainer = contentEl.createDiv();
-		descContainer.createEl("label", { text: "Description:" });
+		descContainer.createEl("label", { text: translate('ui.description') });
 		const descInput = descContainer.createEl("input", {
 			type: "text",
 			value: this.option.description,
@@ -179,7 +180,7 @@ export class EditSuggestionModal extends Modal {
 
 		// Prompt field
 		const promptContainer = contentEl.createDiv();
-		promptContainer.createEl("label", { text: "Prompt:" });
+		promptContainer.createEl("label", { text: translate('ui.prompt') });
 		const promptInput = promptContainer.createEl("textarea");
 		console.log("Option prompt:", this.option.prompt);
 		// Set value after element creation
@@ -200,14 +201,14 @@ export class EditSuggestionModal extends Modal {
 		const leftButtonContainer = buttonContainer.createDiv();
 		if (this.onDelete) {
 			const deleteButton = leftButtonContainer.createEl("button", {
-				text: "Delete",
+				text: translate('ui.delete'),
 			});
 			deleteButton.style.backgroundColor = "var(--interactive-accent)";
 			deleteButton.style.color = "var(--text-on-accent)";
 			deleteButton.onclick = () => {
 				// Confirm deletion
 				const confirmed = confirm(
-					`Are you sure you want to delete the suggestion "${this.option.name}"?`,
+					translate('confirm.delete-suggestion', { name: this.option.name }),
 				);
 				if (confirmed && this.onDelete) {
 					this.onDelete(this.option.id);
@@ -222,7 +223,7 @@ export class EditSuggestionModal extends Modal {
 		rightButtonContainer.style.gap = "10px";
 
 		const saveButton = rightButtonContainer.createEl("button", {
-			text: "Save",
+			text: translate('ui.save'),
 		});
 		saveButton.onclick = async () => {
 			this.option.name = nameInput.value;

@@ -1,6 +1,7 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
 import type AiAssistantPlugin from "./main";
 import { ALL_MODELS } from "./settings";
+import { translate, setLanguage, getAvailableLanguages } from "./i18n/language-manager";
 
 export class AiAssistantSettingTab extends PluginSettingTab {
 	plugin: AiAssistantPlugin;
@@ -15,14 +16,34 @@ export class AiAssistantSettingTab extends PluginSettingTab {
 
 		containerEl.empty();
 
-		containerEl.createEl("h2", { text: "AI Assistant Settings" });
+		containerEl.createEl("h2", { text: translate('ui.settings-title') });
+
+		// Language setting
+		new Setting(containerEl)
+			.setName(translate('settings.language'))
+			.setDesc(translate('settings.language-desc'))
+			.addDropdown((dropdown) => {
+				const languages = getAvailableLanguages();
+				languages.forEach((lang) => {
+					dropdown.addOption(lang.code, lang.name);
+				});
+				dropdown
+					.setValue(this.plugin.settings.language || 'en')
+					.onChange(async (value) => {
+						this.plugin.settings.language = value;
+						await this.plugin.saveSettings();
+						setLanguage(value);
+						// Refresh the settings tab to show updated translations
+						this.display();
+					});
+			});
 
 		new Setting(containerEl)
-			.setName("OpenAI API Key")
-			.setDesc("Enter your OpenAI API key")
+			.setName(translate('settings.openai-key'))
+			.setDesc(translate('settings.openai-key-desc'))
 			.addText((text) =>
 				text
-					.setPlaceholder("Enter your API key")
+					.setPlaceholder(translate('placeholder.api-key'))
 					.setValue(this.plugin.settings.openAIapiKey)
 					.onChange(async (value) => {
 						this.plugin.settings.openAIapiKey = value;
@@ -31,11 +52,11 @@ export class AiAssistantSettingTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
-			.setName("Anthropic API Key")
-			.setDesc("Enter your Anthropic API key")
+			.setName(translate('settings.anthropic-key'))
+			.setDesc(translate('settings.anthropic-key-desc'))
 			.addText((text) =>
 				text
-					.setPlaceholder("Enter your API key")
+					.setPlaceholder(translate('placeholder.api-key'))
 					.setValue(this.plugin.settings.anthropicApiKey)
 					.onChange(async (value) => {
 						this.plugin.settings.anthropicApiKey = value;
@@ -44,11 +65,11 @@ export class AiAssistantSettingTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
-			.setName("Qwen API Key")
-			.setDesc("Enter your Qwen API key")
+			.setName(translate('settings.qwen-key'))
+			.setDesc(translate('settings.qwen-key-desc'))
 			.addText((text) =>
 				text
-					.setPlaceholder("Enter your API key")
+					.setPlaceholder(translate('placeholder.api-key'))
 					.setValue(this.plugin.settings.qwenApiKey)
 					.onChange(async (value) => {
 						this.plugin.settings.qwenApiKey = value;
@@ -57,11 +78,11 @@ export class AiAssistantSettingTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
-			.setName("Qwen Base URL")
-			.setDesc("Enter your Qwen Base URL")
+			.setName(translate('settings.qwen-base-url'))
+			.setDesc(translate('settings.qwen-base-url-desc'))
 			.addText((text) =>
 				text
-					.setPlaceholder("Enter your Base URL")
+					.setPlaceholder(translate('placeholder.base-url'))
 					.setValue(this.plugin.settings.qwenBaseURL)
 					.onChange(async (value) => {
 						this.plugin.settings.qwenBaseURL = value;
@@ -70,8 +91,8 @@ export class AiAssistantSettingTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
-			.setName("Model")
-			.setDesc("Choose the AI model to use")
+			.setName(translate('settings.model'))
+			.setDesc(translate('settings.model-desc'))
 			.addDropdown((dropdown) => {
 				Object.entries(ALL_MODELS).forEach(([key, value]) => {
 					dropdown.addOption(key, value);

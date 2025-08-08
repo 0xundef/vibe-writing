@@ -14,6 +14,7 @@ import { AiAssistantSettings, DEFAULT_SETTINGS, ImprovementOption } from "./type
 import { AIPromptModal, EditSuggestionModal } from "./modals";
 import { ImprovementSuggester } from "./suggester";
 import { AiAssistantSettingTab } from "./settings-tab";
+import { translate, initializeLanguage } from "./i18n/language-manager";
 
 
 
@@ -63,6 +64,9 @@ export default class AiAssistantPlugin extends Plugin {
 		try {
 			await this.loadSettings();
 
+			// Initialize language manager
+			initializeLanguage(this.settings.language);
+
 			// Initialize suggestions if empty
 			if (
 				!this.settings.suggestions ||
@@ -91,21 +95,21 @@ export default class AiAssistantPlugin extends Plugin {
 
 			// Add status bar item
 			this.statusBarItem = this.addStatusBarItem();
-			this.updateStatusBar("Initializing...");
+			this.updateStatusBar(translate('status.initializing'));
 
 			// Set to ready after initialization
 			setTimeout(() => {
-				this.updateStatusBar("Ready");
+				this.updateStatusBar(translate('status.ready'));
 			}, 100);
 
 			// Add command to improve previous selection with suggester
 			this.addCommand({
 				id: "ai-written",
-				name: "Written improvement",
+				name: translate('command.written-improvement'),
 				callback: async () => {
 					if (!this.lastSelection) {
 						new Notice(
-							"No previous selection found. Please select some text first.",
+							translate('notice.no-selection'),
 						);
 						return;
 					}
@@ -119,7 +123,7 @@ export default class AiAssistantPlugin extends Plugin {
 			// Add command to compress images
 			this.addCommand({
 				id: "compress-image",
-				name: "Compress Image in Current Note",
+				name: translate('command.compress-images'),
 				callback: async () => {
 					await this.compressImagesInCurrentNote();
 				},
@@ -128,7 +132,7 @@ export default class AiAssistantPlugin extends Plugin {
 			// Add command to create new prompt
 			this.addCommand({
 				id: "new-prompt",
-				name: "New prompt",
+				name: translate('command.new-prompt'),
 				callback: async () => {
 					// Create a new empty prompt option
 					const newOption: ImprovementOption = {
@@ -152,14 +156,14 @@ export default class AiAssistantPlugin extends Plugin {
 								this.settings.suggestions.push(updatedOption);
 								await this.saveSettings();
 								new Notice(
-									`New prompt "${updatedOption.name}" added successfully!`,
+									translate('notice.prompt-added-success', { name: updatedOption.name }),
 								);
 							} else {
-								new Notice("Name and prompt cannot be empty!");
+								new Notice(translate('notice.name-prompt-empty'));
 							}
 						},
 						undefined, // No delete callback for new prompts
-						"Add New Prompt",
+						translate('modal.add-new-prompt'),
 					);
 					editModal.open();
 				},
@@ -168,7 +172,7 @@ export default class AiAssistantPlugin extends Plugin {
 			// Add command to open edit modal
 			this.addCommand({
 				id: "one-shot-chat",
-				name: "One shot chat",
+				name: translate('command.one-shot-chat'),
 				callback: async () => {
 					const activeView =
 						this.app.workspace.getActiveViewOfType(MarkdownView);
@@ -194,24 +198,24 @@ export default class AiAssistantPlugin extends Plugin {
 			// Add command to replace original text with last AI response
 			this.addCommand({
 				id: "replace-with-ai",
-				name: "Replace with last AI response",
+				name: translate('command.replace-ai-response'),
 				callback: async () => {
 					if (!this.lastSelection) {
 						new Notice(
-							"No previous selection found. Please select some text first.",
+							translate('notice.no-selection'),
 						);
 						return;
 					}
 
 					if (!this.lastAiResponse) {
 						new Notice(
-							"No AI response available. Please generate an AI response first.",
+							translate('notice.no-ai-response'),
 						);
 						return;
 					}
 
 					if (!this.lastSelection.editor) {
-						new Notice("Editor not available.");
+						new Notice(translate('notice.editor-not-available'));
 						return;
 					}
 
@@ -319,16 +323,9 @@ export default class AiAssistantPlugin extends Plugin {
 		return [
 			{
 				id: "general",
-				name: "English Simple improvement",
-				description: "Typo and grammar correction",
-				prompt: `Help me to correct text, just focus on typo and grammar, format the corrected text as markdown,
-				initially I will send you text "This is an fish", you should return the corrected text "This is ~~an~~ a fish", which is a typo correction in markdown format.
-				"I like to eat 冰棍 " , you should return the corrected text "I like to eat ~~冰棍~~ popsicle /ˈpɑːp.sɪ.kəl/", the phonetic symbol is wrapped by two slashes.
-				If there is no typo or grammar error, just return the original text.
-				If there is a grammar error, you should return the corrected text in markdown format.
-				Caution: Do not add any extra information, just return the corrected text directly.
-				The text need to be corrected:
-				`,
+				name: translate('suggestion.english-improvement.name'),
+				description: translate('suggestion.english-improvement.desc'),
+				prompt: translate('suggestion.english-improvement.prompt'),
 			},
 		];
 	}

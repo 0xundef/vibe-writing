@@ -2,6 +2,7 @@ import { App, Notice, SuggestModal } from "obsidian";
 import type AiAssistantPlugin from "./main";
 import { ImprovementOption } from "./types";
 import { EditSuggestionModal } from "./modals";
+import { translate } from "./i18n/language-manager";
 
 export class ImprovementSuggester extends SuggestModal<ImprovementOption> {
 	plugin: AiAssistantPlugin;
@@ -75,7 +76,7 @@ export class ImprovementSuggester extends SuggestModal<ImprovementOption> {
 
 		// Right side: edit button
 		const editButton = contentContainer.createEl("button", {
-			text: "edit",
+			text: translate("ui.edit"),
 			cls: "suggestion-edit-btn",
 		});
 		editButton.style.marginLeft = "10px";
