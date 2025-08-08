@@ -1,0 +1,240 @@
+import { App, Modal, Notice } from "obsidian";
+import type AiAssistantPlugin from "./main";
+import { ImprovementOption } from "./types";
+
+export class AIPromptModal extends Modal {
+	plugin: AiAssistantPlugin;
+	selectedText: string;
+	promptInput: HTMLInputElement;
+	responseArea: HTMLTextAreaElement;
+
+	constructor(
+		app: App,
+		plugin: AiAssistantPlugin,
+		selectedText: string = "",
+	) {
+		super(app);
+		this.plugin = plugin;
+		this.selectedText = selectedText;
+	}
+
+	onOpen() {
+		const { contentEl } = this;
+		contentEl.empty();
+		contentEl.addClass("ai-prompt-modal");
+
+		// Prompt field
+		const promptContainer = contentEl.createDiv();
+		this.promptInput = promptContainer.createEl("input", {
+			type: "text",
+			placeholder: "Enter your prompt here...",
+		});
+		this.promptInput.style.width = "100%";
+		this.promptInput.style.marginBottom = "10px";
+
+		// Response field
+		const responseContainer = contentEl.createDiv();
+		this.responseArea = responseContainer.createEl("textarea");
+		this.responseArea.style.width = "100%";
+		this.responseArea.style.height = "200px";
+		this.responseArea.style.marginBottom = "20px";
+		this.responseArea.style.resize = "vertical";
+		this.responseArea.placeholder = "AI response will appear here...";
+		this.responseArea.readOnly = true;
+
+		// Focus the input
+		setTimeout(() => {
+			this.promptInput.focus();
+		}, 100);
+
+		// Handle keyboard shortcuts
+		this.promptInput.addEventListener("keydown", (e) => {
+			if (e.key === "Enter") {
+				e.preventDefault();
+				this.sendPrompt();
+			}
+			if (e.key === "Escape") {
+				e.preventDefault();
+				this.close();
+			}
+		});
+	}
+
+	async sendPrompt() {
+		const prompt = this.promptInput.value.trim();
+		if (!prompt) {
+			new Notice("Please enter a prompt");
+			return;
+		}
+
+		// Show loading state
+		this.promptInput.disabled = true;
+		this.promptInput.placeholder = "Generating response...";
+
+		try {
+			// Build the prompt with selected text if available
+			let fullPrompt = prompt;
+			if (this.selectedText) {
+				fullPrompt = `${prompt}\n\nSelected text:\n${this.selectedText}`;
+			}
+
+			// Build the API client
+			this.plugin.build_api();
+			if (!this.plugin.aiAssistant) {
+				new Notice(
+					"API client not configured. Please check your settings.",
+				);
+				return;
+			}
+
+			// Make the API call
+			const messages = [
+				{
+					role: "user",
+					content: fullPrompt,
+				},
+			];
+
+			const response =
+				await this.plugin.aiAssistant.text_api_call(messages);
+
+			if (response) {
+				this.displayResponse(response);
+			} else {
+				this.displayResponse("No response received from AI.");
+			}
+		} catch (error) {
+			console.error("AI API Error:", error);
+			this.displayResponse(
+				`Error: ${error.message || "Failed to get AI response"}`,
+			);
+		} finally {
+			// Re-enable input
+			this.promptInput.disabled = false;
+			this.promptInput.placeholder = "Enter your prompt here...";
+			// Clear input for next prompt
+			this.promptInput.value = "";
+		}
+	}
+
+	displayResponse(response: string) {
+		this.responseArea.value = response;
+	}
+
+	onClose() {
+		const { contentEl } = this;
+		contentEl.empty();
+	}
+}
+
+export class EditSuggestionModal extends Modal {
+	plugin: AiAssistantPlugin;
+	option: ImprovementOption;
+	onSave: (updatedOption: ImprovementOption) => void;
+	onDelete?: (optionId: string) => void;
+	title: string;
+
+	constructor(
+		app: App,
+		plugin: AiAssistantPlugin,
+		option: ImprovementOption,
+		onSave: (updatedOption: ImprovementOption) => void,
+		onDelete?: (optionId: string) => void,
+		title: string = "Edit Suggestion",
+	) {
+		super(app);
+		this.plugin = plugin;
+		this.option = { ...option }; // Create a copy
+		this.onSave = onSave;
+		this.onDelete = onDelete;
+		this.title = title;
+	}
+
+	onOpen() {
+		const { contentEl } = this;
+		contentEl.empty();
+		contentEl.addClass("edit-suggestion-modal");
+
+		contentEl.createEl("h2", { text: this.title });
+
+		// Name field
+		const nameContainer = contentEl.createDiv();
+		nameContainer.createEl("label", { text: "Name:" });
+		const nameInput = nameContainer.createEl("input", {
+			type: "text",
+			value: this.option.name,
+		});
+		nameInput.style.width = "100%";
+		nameInput.style.marginBottom = "10px";
+
+		// Description field
+		const descContainer = contentEl.createDiv();
+		descContainer.createEl("label", { text: "Description:" });
+		const descInput = descContainer.createEl("input", {
+			type: "text",
+			value: this.option.description,
+		});
+		descInput.style.width = "100%";
+		descInput.style.marginBottom = "10px";
+
+		// Prompt field
+		const promptContainer = contentEl.createDiv();
+		promptContainer.createEl("label", { text: "Prompt:" });
+		const promptInput = promptContainer.createEl("textarea");
+		console.log("Option prompt:", this.option.prompt);
+		// Set value after element creation
+		promptInput.value = this.option.prompt || "";
+		promptInput.style.width = "100%";
+		promptInput.style.height = "150px";
+		promptInput.style.marginBottom = "20px";
+		console.log("Textarea value after setting:", promptInput.value);
+		console.log("Textarea element:", promptInput);
+
+		// Buttons
+		const buttonContainer = contentEl.createDiv();
+		buttonContainer.style.display = "flex";
+		buttonContainer.style.gap = "10px";
+		buttonContainer.style.justifyContent = "space-between";
+
+		// Left side - Delete button (if onDelete callback provided)
+		const leftButtonContainer = buttonContainer.createDiv();
+		if (this.onDelete) {
+			const deleteButton = leftButtonContainer.createEl("button", {
+				text: "Delete",
+			});
+			deleteButton.style.backgroundColor = "var(--interactive-accent)";
+			deleteButton.style.color = "var(--text-on-accent)";
+			deleteButton.onclick = () => {
+				// Confirm deletion
+				const confirmed = confirm(
+					`Are you sure you want to delete the suggestion "${this.option.name}"?`,
+				);
+				if (confirmed && this.onDelete) {
+					this.onDelete(this.option.id);
+					this.close();
+				}
+			};
+		}
+
+		// Right side - Save button
+		const rightButtonContainer = buttonContainer.createDiv();
+		rightButtonContainer.style.display = "flex";
+		rightButtonContainer.style.gap = "10px";
+
+		const saveButton = rightButtonContainer.createEl("button", {
+			text: "Save",
+		});
+		saveButton.onclick = async () => {
+			this.option.name = nameInput.value;
+			this.option.description = descInput.value;
+			this.option.prompt = promptInput.value;
+			this.onSave(this.option);
+			this.close();
+		};
+	}
+
+	onClose() {
+		const { contentEl } = this;
+		contentEl.empty();
+	}
+}
