@@ -136,5 +136,41 @@ export class AiAssistantSettingTab extends PluginSettingTab {
 		// Image Processing Settings (optional - uncomment to enable)
 		// this.imageSettingsManager.addImageSettingsHeader(containerEl);
 		// this.imageSettingsManager.addImageSettings(containerEl);
+
+		// Support Section
+		containerEl.createEl("h3", { text: "Support the Project" });
+		
+		const supportDesc = containerEl.createEl("p", {
+			text: "If you find Vibe Writing helpful, consider supporting its development:"
+		});
+		supportDesc.style.marginBottom = "15px";
+		supportDesc.style.color = "var(--text-muted)";
+
+		// Create coffee button container
+		const coffeeContainer = containerEl.createDiv({ cls: "coffee-container" });
+		
+		// Create the coffee button as a clickable link
+		const coffeeLink = coffeeContainer.createEl("a", {
+			href: "https://buymeacoffee.com/nilisnone",
+			attr: { target: "_blank", rel: "noopener noreferrer" }
+		});
+		
+		// Add the coffee button image
+		const coffeeImg = coffeeLink.createEl("img", {
+			attr: {
+				src: "https://cdn.buymeacoffee.com/buttons/v2/default-violet.png",
+				alt: "Buy Me A Coffee"
+			},
+			cls: "coffee-button-img"
+		});
+		
+		// Add thank you message
+		const thankYouMsg = containerEl.createEl("p", {
+			text: "Your support helps maintain and improve this plugin. Thank you! ☕"
+		});
+		thankYouMsg.style.textAlign = "center";
+		thankYouMsg.style.marginTop = "10px";
+		thankYouMsg.style.color = "var(--text-muted)";
+		thankYouMsg.style.fontSize = "0.9em";
 	}
 }
