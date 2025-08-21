@@ -108,7 +108,7 @@ export class AiAssistantSettingTab extends PluginSettingTab {
 		
 		// Create the coffee button as a clickable link
 		const coffeeLink = coffeeContainer.createEl("a", {
-			href: "https://buymeacoffee.com/nilisnone",
+			href: "https://buymeacoffee.com/0xundef",
 			attr: { target: "_blank", rel: "noopener noreferrer" }
 		});
 		

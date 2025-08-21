@@ -3,7 +3,12 @@
 	"name": "Vibe Writing",
 	"version": "1.0.1",
 	"minAppVersion": "0.15.0",
-	"description": "Vibe Writing plugin for Obsidian",
-	"author": "nilisnone",
-	"isDesktopOnly": false
+	"description": "AI-powered writing assistant for Obsidian, make writing easier and more efficient",
+	"author": "0xundef",
+	"authorUrl": "https://github.com/0xundef",
+	"isDesktopOnly": false,
+	"fundingUrl": {
+		"Buy Me a Coffee": "https://buymeacoffee.com/0xundef",
+		"GitHub Sponsor": "https://github.com/sponsors/0xundef"
+	}
 }
