@@ -1,15 +1,14 @@
-import {
-	MarkdownView,
-	Notice,
-	Plugin,
-	TFile,
-} from "obsidian";
+import { MarkdownView, Notice, Plugin, TFile } from "obsidian";
 import {
 	AnthropicAssistant,
 	OpenAIAssistant,
 	QwenAssistant,
 } from "./openai_api";
-import { AiAssistantSettings, DEFAULT_SETTINGS, ImprovementOption } from "./types";
+import {
+	AiAssistantSettings,
+	DEFAULT_SETTINGS,
+	ImprovementOption,
+} from "./types";
 import { AIPromptModal, EditSuggestionModal } from "./modals";
 import { ImprovementSuggester } from "./suggester";
 import { AiAssistantSettingTab } from "./settings-tab";
@@ -50,14 +49,12 @@ export default class AiAssistantPlugin extends Plugin {
 	}
 
 	async onload() {
-		// Remove debug console.log
-		
 		try {
 			await this.loadSettings();
-		
+
 			// Initialize language manager
 			initializeLanguage(this.settings.language);
-		
+
 			// Initialize suggestions if empty
 			if (
 				!this.settings.suggestions ||
@@ -66,53 +63,36 @@ export default class AiAssistantPlugin extends Plugin {
 				this.settings.suggestions = this.getDefaultSuggestions();
 				await this.saveSettings();
 			}
-			// Remove the orphaned object literal completely (lines 70-80)
-			
 			this.build_api();
-			// Also remove this console.log for production
-			// Line 83 - Remove this debug log:
-			// console.log("✅ AI Assistant Plugin: API client built successfully");
-			
 			// Add status bar item
 			this.statusBarItem = this.addStatusBarItem();
-			this.updateStatusBar(translate('status.initializing'));
-	
+			this.updateStatusBar(translate("status.initializing"));
+
 			// Set to ready after initialization
 			setTimeout(() => {
-				this.updateStatusBar(translate('status.ready'));
+				this.updateStatusBar(translate("status.ready"));
 			}, 100);
-	
+
 			// Add command to improve previous selection with suggester
 			this.addCommand({
 				id: "ai-written",
-				name: translate('command.written-improvement'),
+				name: translate("command.written-improvement"),
 				callback: async () => {
 					if (!this.lastSelection) {
-						new Notice(
-							translate('notice.no-selection'),
-						);
+						new Notice(translate("notice.no-selection"));
 						return;
 					}
-	
+
 					// Open suggester modal to choose improvement type
 					const suggester = new ImprovementSuggester(this.app, this);
 					suggester.open();
 				},
 			});
-	
-			// Add command to compress images
-			// this.addCommand({
-			// 	id: "compress-image",
-			// 	name: translate('command.compress-images'),
-			// 	callback: async () => {
-			// 		await this.compressImagesInCurrentNote();
-			// 	},
-			// });
-	
+
 			// Add command to create new prompt
 			this.addCommand({
 				id: "new-prompt",
-				name: translate('command.new-prompt'),
+				name: translate("command.new-prompt"),
 				callback: async () => {
 					// Create a new empty prompt option
 					const newOption: ImprovementOption = {
@@ -121,7 +101,7 @@ export default class AiAssistantPlugin extends Plugin {
 						description: "",
 						prompt: "",
 					};
-	
+
 					// Open edit modal for the new prompt
 					const editModal = new EditSuggestionModal(
 						this.app,
@@ -136,28 +116,32 @@ export default class AiAssistantPlugin extends Plugin {
 								this.settings.suggestions.push(updatedOption);
 								await this.saveSettings();
 								new Notice(
-									translate('notice.prompt-added-success', { name: updatedOption.name }),
+									translate("notice.prompt-added-success", {
+										name: updatedOption.name,
+									}),
 								);
 							} else {
-								new Notice(translate('notice.name-prompt-empty'));
+								new Notice(
+									translate("notice.name-prompt-empty"),
+								);
 							}
 						},
 						undefined, // No delete callback for new prompts
-						translate('modal.add-new-prompt'),
+						translate("modal.add-new-prompt"),
 					);
 					editModal.open();
 				},
 			});
-	
+
 			// Add command to open edit modal
 			this.addCommand({
 				id: "one-shot-chat",
-				name: translate('command.one-shot-chat'),
+				name: translate("command.one-shot-chat"),
 				callback: async () => {
 					const activeView =
 						this.app.workspace.getActiveViewOfType(MarkdownView);
 					let initialContent = "";
-	
+
 					// If there's a text selection, use it as initial content
 					if (activeView && activeView.editor) {
 						const selection = activeView.editor.getSelection();
@@ -165,7 +149,7 @@ export default class AiAssistantPlugin extends Plugin {
 							initialContent = selection;
 						}
 					}
-	
+
 					const aiModal = new AIPromptModal(
 						this.app,
 						this,
@@ -174,31 +158,27 @@ export default class AiAssistantPlugin extends Plugin {
 					aiModal.open();
 				},
 			});
-	
+
 			// Add command to replace original text with last AI response
 			this.addCommand({
 				id: "replace-with-ai",
-				name: translate('command.replace-ai-response'),
+				name: translate("command.replace-ai-response"),
 				callback: async () => {
 					if (!this.lastSelection) {
-						new Notice(
-							translate('notice.no-selection'),
-						);
+						new Notice(translate("notice.no-selection"));
 						return;
 					}
-	
+
 					if (!this.lastAiResponse) {
-						new Notice(
-							translate('notice.no-ai-response'),
-						);
+						new Notice(translate("notice.no-ai-response"));
 						return;
 					}
-	
+
 					if (!this.lastSelection.editor) {
-						new Notice(translate('notice.editor-not-available'));
+						new Notice(translate("notice.editor-not-available"));
 						return;
 					}
-	
+
 					// First delete the quote block if it exists
 					if (
 						this.lastQuoteBlockRange &&
@@ -212,14 +192,14 @@ export default class AiAssistantPlugin extends Plugin {
 						// Clear the quote block range after deletion
 						this.lastQuoteBlockRange = null;
 					}
-	
+
 					// Then replace the original text with the AI response
 					this.lastSelection.editor.replaceRange(
 						this.lastAiResponse,
 						this.lastSelection.from,
 						this.lastSelection.to,
 					);
-	
+
 					// Calculate the end position of the newly inserted text
 					const newTextEnd = {
 						line:
@@ -233,24 +213,24 @@ export default class AiAssistantPlugin extends Plugin {
 								: this.lastAiResponse.split("\n").pop()
 										?.length || 0,
 					};
-	
+
 					// Select the newly inserted text to highlight it
 					this.lastSelection.editor.setSelection(
 						this.lastSelection.from,
 						newTextEnd,
 					);
-	
+
 					new Notice("Text replaced with AI response!");
 				},
 			});
-	
+
 			// Register event to capture text selections
 			this.registerDomEvent(document, "selectionchange", () => {
 				this.captureSelection();
 			});
-	
+
 			this.addSettingTab(new AiAssistantSettingTab(this.app, this));
-	
+
 			console.log(
 				"🎉 AI Assistant Plugin: Successfully loaded with all commands and settings!",
 			);
@@ -304,9 +284,9 @@ export default class AiAssistantPlugin extends Plugin {
 		return [
 			{
 				id: "general",
-				name: translate('suggestion.english-improvement.name'),
-				description: translate('suggestion.english-improvement.desc'),
-				prompt: translate('suggestion.english-improvement.prompt'),
+				name: translate("suggestion.english-improvement.name"),
+				description: translate("suggestion.english-improvement.desc"),
+				prompt: translate("suggestion.english-improvement.prompt"),
 			},
 		];
 	}

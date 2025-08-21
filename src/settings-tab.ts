@@ -16,12 +16,8 @@ export class AiAssistantSettingTab extends PluginSettingTab {
 
 	display(): void {
 		const { containerEl } = this;
-
 		containerEl.empty();
-
 		containerEl.createEl("h2", { text: translate('ui.settings-title') });
-
-		// Model Configuration Section
 		containerEl.createEl("h3", { text: "Model configuration" }); // Line 25
 
 		new Setting(containerEl)
@@ -55,7 +51,6 @@ export class AiAssistantSettingTab extends PluginSettingTab {
 					}),
 			);
 
-		// Add Base URI setting
 		new Setting(containerEl)
 			.setName("Base URI")
 			.setDesc("Base URI for API requests (leave empty for default)")
@@ -78,7 +73,6 @@ export class AiAssistantSettingTab extends PluginSettingTab {
 					.setPlaceholder("Enter your API key")
 					.setValue(this.plugin.settings.openAIapiKey || this.plugin.settings.anthropicApiKey || this.plugin.settings.qwenApiKey || "")
 					.onChange(async (value) => {
-						// Update the appropriate API key based on selected model
 						if (this.plugin.settings.modelName.includes("claude")) {
 							this.plugin.settings.anthropicApiKey = value;
 						} else if (this.plugin.settings.modelName.includes("qwen")) {
@@ -90,13 +84,7 @@ export class AiAssistantSettingTab extends PluginSettingTab {
 					}),
 			);
 
-		// Image Processing Settings (optional - uncomment to enable)
-		// this.imageSettingsManager.addImageSettingsHeader(containerEl);
-		// this.imageSettingsManager.addImageSettings(containerEl);
-
-		// Support Section
-		containerEl.createEl("h3", { text: "Support the project" }); // Line 98
-
+		containerEl.createEl("h3", { text: "Support the project" });
 		const supportDesc = containerEl.createEl("p", {
 			text: "If you find Vibe Writing helpful, consider supporting its development:",
 			cls: "vibe-writing-support-desc",
@@ -115,7 +103,6 @@ export class AiAssistantSettingTab extends PluginSettingTab {
 			cls: "vibe-writing-coffee-button-img"
 		});
 
-		// Add thank you message
 		const thankYouMsg = containerEl.createEl("p", {
 			text: "Your support helps maintain and improve this plugin. Thank you! ☕",
 			cls: "vibe-writing-thank-you-msg",

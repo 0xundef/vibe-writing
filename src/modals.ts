@@ -28,37 +28,33 @@ export class AIPromptModal extends Modal {
 		const promptContainer = contentEl.createDiv();
 		this.promptInput = promptContainer.createEl("input", {
 			type: "text",
-			placeholder: translate('placeholder.prompt-input'),
+			placeholder: translate("placeholder.prompt-input"),
 		});
 		// Apply classes instead of inline styles
-        this.promptInput.addClass("vibe-writing-full-width");
-        this.promptInput.addClass("vibe-writing-mb-10");
+		this.promptInput.addClass("vibe-writing-full-width");
+		this.promptInput.addClass("vibe-writing-mb-10");
 
 		// Response field
 		const responseContainer = contentEl.createDiv();
 		this.responseArea = responseContainer.createEl("textarea");
 		// Apply classes instead of inline styles
-        this.responseArea.addClass("vibe-writing-full-width");
-        this.responseArea.addClass("vibe-writing-response-area");
-        this.responseArea.addClass("vibe-writing-mb-10");
-		this.responseArea.placeholder = translate('placeholder.ai-response');
+		this.responseArea.addClass("vibe-writing-full-width");
+		this.responseArea.addClass("vibe-writing-response-area");
+		this.responseArea.addClass("vibe-writing-mb-10");
+		this.responseArea.placeholder = translate("placeholder.ai-response");
 		this.responseArea.readOnly = true;
 
 		// Button container for better layout
-        const buttonContainer = contentEl.createDiv();
-        buttonContainer.addClass("vibe-writing-button-row");
+		const buttonContainer = contentEl.createDiv();
+		buttonContainer.addClass("vibe-writing-button-row");
 
 		// Copy button
 		const copyButton = buttonContainer.createEl("button", {
-			text: translate('ui.copy'),
+			text: translate("ui.copy"),
 		});
 		// Use class-based styling
-        copyButton.addClass("vibe-writing-btn");
-        copyButton.addClass("vibe-writing-btn-primary");
-
-		// Remove JS hover styling; CSS will handle :hover
-		// copyButton.addEventListener("mouseenter", () => { copyButton.style.opacity = "0.8"; });
-		// copyButton.addEventListener("mouseleave", () => { copyButton.style.opacity = "1"; });
+		copyButton.addClass("vibe-writing-btn");
+		copyButton.addClass("vibe-writing-btn-primary");
 
 		// Copy button click handler
 		copyButton.addEventListener("click", () => {
@@ -86,13 +82,15 @@ export class AIPromptModal extends Modal {
 	async sendPrompt() {
 		const prompt = this.promptInput.value.trim();
 		if (!prompt) {
-			new Notice(translate('notice.enter-prompt'));
+			new Notice(translate("notice.enter-prompt"));
 			return;
 		}
 
 		// Show loading state
 		this.promptInput.disabled = true;
-		this.promptInput.placeholder = translate('placeholder.generating-response');
+		this.promptInput.placeholder = translate(
+			"placeholder.generating-response",
+		);
 
 		try {
 			// Build the prompt with selected text if available
@@ -104,9 +102,7 @@ export class AIPromptModal extends Modal {
 			// Build the API client
 			this.plugin.build_api();
 			if (!this.plugin.aiAssistant) {
-				new Notice(
-					translate('notice.api-not-configured'),
-				);
+				new Notice(translate("notice.api-not-configured"));
 				return;
 			}
 
@@ -124,17 +120,19 @@ export class AIPromptModal extends Modal {
 			if (response) {
 				this.displayResponse(response);
 			} else {
-				this.displayResponse(translate('message.no-response'));
+				this.displayResponse(translate("message.no-response"));
 			}
 		} catch (error) {
 			console.error("AI API Error:", error);
 			this.displayResponse(
-				`${translate('error.prefix')}: ${error.message || translate('error.failed-ai-response')}`,
+				`${translate("error.prefix")}: ${error.message || translate("error.failed-ai-response")}`,
 			);
 		} finally {
 			// Re-enable input
 			this.promptInput.disabled = false;
-			this.promptInput.placeholder = translate('placeholder.prompt-input');
+			this.promptInput.placeholder = translate(
+				"placeholder.prompt-input",
+			);
 			// Clear input for next prompt
 			this.promptInput.value = "";
 		}
@@ -143,24 +141,27 @@ export class AIPromptModal extends Modal {
 	copyResponse() {
 		const responseText = this.responseArea.value.trim();
 		if (!responseText) {
-			new Notice(translate('placeholder.ai-response'));
+			new Notice(translate("placeholder.ai-response"));
 			return;
 		}
 
 		// Copy to clipboard
-		navigator.clipboard.writeText(responseText).then(() => {
-			new Notice(translate('notice.copied-to-clipboard'));
-		}).catch((err) => {
-			console.error('Failed to copy text: ', err);
-			// Fallback for older browsers
-			const textArea = document.createElement('textarea');
-			textArea.value = responseText;
-			document.body.appendChild(textArea);
-			textArea.select();
-			document.execCommand('copy');
-			document.body.removeChild(textArea);
-			new Notice(translate('notice.copied-to-clipboard'));
-		});
+		navigator.clipboard
+			.writeText(responseText)
+			.then(() => {
+				new Notice(translate("notice.copied-to-clipboard"));
+			})
+			.catch((err) => {
+				console.error("Failed to copy text: ", err);
+				// Fallback for older browsers
+				const textArea = document.createElement("textarea");
+				textArea.value = responseText;
+				document.body.appendChild(textArea);
+				textArea.select();
+				document.execCommand("copy");
+				document.body.removeChild(textArea);
+				new Notice(translate("notice.copied-to-clipboard"));
+			});
 	}
 
 	displayResponse(response: string) {
@@ -201,49 +202,49 @@ export class EditSuggestionModal extends Modal {
 		contentEl.empty();
 		contentEl.addClass("vibe-writing-modal");
 
-		contentEl.createEl("h2", { text: translate('modal.edit-suggestion') });
+		contentEl.createEl("h2", { text: translate("modal.edit-suggestion") });
 
 		// Name field
 		const nameContainer = contentEl.createDiv();
-		nameContainer.createEl("label", { text: translate('ui.name') });
+		nameContainer.createEl("label", { text: translate("ui.name") });
 		const nameInput = nameContainer.createEl("input", {
 			type: "text",
 			value: this.option.name,
 		});
 		nameInput.addClass("vibe-writing-full-width");
-        nameInput.addClass("vibe-writing-mb-10");
+		nameInput.addClass("vibe-writing-mb-10");
 
 		// Description field
 		const descContainer = contentEl.createDiv();
-		descContainer.createEl("label", { text: translate('ui.description') });
+		descContainer.createEl("label", { text: translate("ui.description") });
 		const descInput = descContainer.createEl("input", {
 			type: "text",
 			value: this.option.description,
 		});
 		descInput.addClass("vibe-writing-full-width");
-        descInput.addClass("vibe-writing-mb-10");
+		descInput.addClass("vibe-writing-mb-10");
 
 		// Prompt field
 		const promptContainer = contentEl.createDiv();
-		promptContainer.createEl("label", { text: translate('ui.prompt') });
+		promptContainer.createEl("label", { text: translate("ui.prompt") });
 		const promptInput = promptContainer.createEl("textarea");
 		promptInput.value = this.option.prompt || "";
 		promptInput.addClass("vibe-writing-full-width");
-        promptInput.addClass("vibe-writing-mb-20");
+		promptInput.addClass("vibe-writing-mb-20");
 		promptInput.addClass("vibe-writing-prompt-textarea");
 
 		// Buttons
-        const buttonContainer = contentEl.createDiv();
-        buttonContainer.addClass("vibe-writing-button-row");
-        buttonContainer.addClass("vibe-writing-gap-10");
+		const buttonContainer = contentEl.createDiv();
+		buttonContainer.addClass("vibe-writing-button-row");
+		buttonContainer.addClass("vibe-writing-gap-10");
 
 		// Delete button with plain styling (if available)
 		if (this.onDelete) {
 			const deleteButton = buttonContainer.createEl("button", {
-				text: translate('ui.delete'),
+				text: translate("ui.delete"),
 			});
 			deleteButton.addClass("vibe-writing-btn");
-            deleteButton.addClass("vibe-writing-btn-plain");
+			deleteButton.addClass("vibe-writing-btn-plain");
 
 			// Remove JS hover styling; CSS will handle :hover
 			// deleteButton.addEventListener('mouseenter', () => {...});
@@ -251,7 +252,9 @@ export class EditSuggestionModal extends Modal {
 
 			deleteButton.onclick = () => {
 				const confirmed = confirm(
-					translate('confirm.delete-suggestion', { name: this.option.name }),
+					translate("confirm.delete-suggestion", {
+						name: this.option.name,
+					}),
 				);
 				if (confirmed && this.onDelete) {
 					this.onDelete(this.option.id);
@@ -262,39 +265,43 @@ export class EditSuggestionModal extends Modal {
 
 		// Save button with accent styling
 		const saveButton = buttonContainer.createEl("button", {
-			text: translate('ui.save'),
+			text: translate("ui.save"),
 		});
 		saveButton.addClass("vibe-writing-btn");
-        saveButton.addClass("vibe-writing-btn-primary");
-
-		// Remove JS hover styling; CSS will handle :hover
-		// saveButton.addEventListener('mouseenter', () => {...});
-		// saveButton.addEventListener('mouseleave', () => {...});
+		saveButton.addClass("vibe-writing-btn-primary");
 
 		saveButton.onclick = async () => {
 			// Validate required fields
 			const name = nameInput.value.trim();
 			const description = descInput.value.trim();
 			const prompt = promptInput.value.trim();
-			
+
 			if (!name) {
-				new Notice(translate('validation.name-required') || 'Name is required');
+				new Notice(
+					translate("validation.name-required") || "Name is required",
+				);
 				nameInput.focus();
 				return;
 			}
-			
+
 			if (!description) {
-				new Notice(translate('validation.description-required') || 'Description is required');
+				new Notice(
+					translate("validation.description-required") ||
+						"Description is required",
+				);
 				descInput.focus();
 				return;
 			}
-			
+
 			if (!prompt) {
-				new Notice(translate('validation.prompt-required') || 'Prompt is required');
+				new Notice(
+					translate("validation.prompt-required") ||
+						"Prompt is required",
+				);
 				promptInput.focus();
 				return;
 			}
-			
+
 			this.option.name = name;
 			this.option.description = description;
 			this.option.prompt = prompt;

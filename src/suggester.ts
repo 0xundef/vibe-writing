@@ -16,12 +16,9 @@ export class ImprovementSuggester extends SuggestModal<ImprovementOption> {
 
 	async onOpen() {
 		super.onOpen();
-		// Load suggestions from settings
 		this.options = this.plugin.settings.suggestions.filter(
 			(s) => !s.hidden,
 		);
-
-		// Trigger rendering after loading
 		setTimeout(() => {
 			if (this.inputEl) {
 				this.inputEl.dispatchEvent(
@@ -32,17 +29,14 @@ export class ImprovementSuggester extends SuggestModal<ImprovementOption> {
 	}
 
 	getSuggestions(query: string): ImprovementOption[] {
-		// Ensure options is initialized
 		if (!this.options) {
 			return [];
 		}
 
-		// If query is empty, show all options initially
 		if (!query || query.trim() === "") {
 			return this.options;
 		}
 
-		// Filter based on query
 		return this.options.filter(
 			(option) =>
 				option.name.toLowerCase().includes(query.toLowerCase()) ||
@@ -55,12 +49,6 @@ export class ImprovementSuggester extends SuggestModal<ImprovementOption> {
 
 		// Create a container for the suggestion content
 		const contentContainer = el.createDiv({ cls: "vibe-writing-suggestion-content" });
-
-		// Remove inline style; use CSS classes instead
-		// contentContainer.style.display = "flex";
-		// contentContainer.style.justifyContent = "space-between";
-		// contentContainer.style.alignItems = "center";
-		// contentContainer.style.width = "100%";
 
 		// Left side: suggestion info
 		const infoContainer = contentContainer.createDiv({
@@ -76,20 +64,10 @@ export class ImprovementSuggester extends SuggestModal<ImprovementOption> {
 			cls: "suggestion-note",
 		});
 
-		// Right side: edit button
 		const editButton = contentContainer.createEl("button", {
 			text: translate("ui.edit"),
 			cls: "vibe-writing-suggestion-edit-btn",
 		});
-		// Remove inline styles; CSS class handles visuals
-		// editButton.style.marginLeft = "10px";
-		// editButton.style.padding = "2px 8px";
-		// editButton.style.fontSize = "12px";
-		// editButton.style.backgroundColor = "var(--interactive-accent)";
-		// editButton.style.color = "var(--text-on-accent)";
-		// editButton.style.border = "none";
-		// editButton.style.borderRadius = "4px";
-		// editButton.style.cursor = "pointer";
 
 		editButton.onclick = (e) => {
 			e.preventDefault();
@@ -122,7 +100,6 @@ export class ImprovementSuggester extends SuggestModal<ImprovementOption> {
 					(s) => !s.hidden,
 				);
 
-				// Refresh the suggester display
 				if (this.inputEl) {
 					this.inputEl.dispatchEvent(
 						new Event("input", { bubbles: true }),
@@ -134,7 +111,6 @@ export class ImprovementSuggester extends SuggestModal<ImprovementOption> {
 				);
 			},
 			async (deletedOptionId: string) => {
-				// Remove the suggestion from plugin settings
 				const index = this.plugin.settings.suggestions.findIndex(
 					(opt) => opt.id === deletedOptionId,
 				);
@@ -143,15 +119,12 @@ export class ImprovementSuggester extends SuggestModal<ImprovementOption> {
 						this.plugin.settings.suggestions[index];
 					this.plugin.settings.suggestions.splice(index, 1);
 
-					// Save settings to persist the deletion
 					await this.plugin.saveSettings();
 
-					// Update the current options array for display
 					this.options = this.plugin.settings.suggestions.filter(
 						(s) => !s.hidden,
 					);
 
-					// Refresh the suggester display
 					if (this.inputEl) {
 						this.inputEl.dispatchEvent(
 							new Event("input", { bubbles: true }),
@@ -179,10 +152,8 @@ export class ImprovementSuggester extends SuggestModal<ImprovementOption> {
 		}
 
 		try {
-			// Update status to processing
 			this.plugin.updateStatusBar("Processing...");
 
-			// Set up timeout for the API call
 			const timeoutMs = 30000; // 30 seconds timeout
 			const timeoutPromise = new Promise((_, reject) => {
 				setTimeout(
@@ -191,11 +162,7 @@ export class ImprovementSuggester extends SuggestModal<ImprovementOption> {
 				);
 			});
 
-			// Around line 192, remove the debug log:
 			const prompt = `${option.prompt}\n\n${this.plugin.lastSelection.text}`;
-			// Remove: console.log(prompt);
-			
-			// Race between API call and timeout
 			const apiCallPromise = this.plugin.aiAssistant.text_api_call([
 				{
 					role: "user",
@@ -206,21 +173,14 @@ export class ImprovementSuggester extends SuggestModal<ImprovementOption> {
 			const answer = await Promise.race([apiCallPromise, timeoutPromise]);
 
 			if (answer && this.plugin.lastSelection.editor) {
-				// Store the AI response for potential replacement
 				this.plugin.lastAiResponse = answer.trim();
-
-				// Create a toggle quote block with the AI response
 				const toggleQuoteBlock = `\n\n> [!quote]+ AI Response (${option.name})\n> ${answer.trim().replace(/\n/g, "\n> ")}`;
-
-				// Insert the toggle quote block at the current cursor position
 				const cursor = this.plugin.lastSelection.editor.getCursor();
 				this.plugin.lastSelection.editor.replaceRange(
 					toggleQuoteBlock,
 					cursor,
 					cursor,
 				);
-
-				// Store the quote block range for potential deletion (including leading newlines)
 				const quoteBlockStart = cursor;
 				const quoteBlockLines = toggleQuoteBlock.split("\n");
 				const quoteBlockEnd = {
@@ -234,11 +194,9 @@ export class ImprovementSuggester extends SuggestModal<ImprovementOption> {
 				};
 
 				new Notice(`AI response added using ${option.name}!`);
-				// Update status to ready
 				this.plugin.updateStatusBar("Ready");
 			} else {
 				new Notice("Failed to get AI response. Please try again.");
-				// Update status to ready even on failure
 				this.plugin.updateStatusBar("Ready");
 			}
 		} catch (error) {
@@ -251,8 +209,6 @@ export class ImprovementSuggester extends SuggestModal<ImprovementOption> {
 				new Notice("Error occurred while improving text.");
 				this.plugin.updateStatusBar("Error");
 			}
-
-			// Reset to ready after 3 seconds
 			setTimeout(() => {
 				this.plugin.updateStatusBar("Ready");
 			}, 3000);
