@@ -1,15 +1,65 @@
 # Vibe Writing
 
-A powerful AI assistant plugin for Obsidian that helps elevate your writing efficiency and improve your writing skills. Vibe Writing integrates multiple AI providers to provide intelligent writing assistance directly within your Obsidian workspace.
+A writing skills improvement assistant for Obsidian that helps you cultivate daily writing habits. Originally designed for English writing improvement for myself, Vibe Writing can be customized for any language through its flexible prompt system. Unlike typical AI writing tools that generate beautiful paragraphs for you, Vibe Writing focuses on identifying and enhancing the specific areas where your writing needs improvement.
 
-## Features
+**This is not an AI proxy - it's your personal writing coach.**
 
-- **Multi-AI Provider Support**: Works with OpenAI, Anthropic (Claude), and Qwen models
-- **Writing Improvement**: AI-powered text enhancement and suggestions
-- **Smart Selection**: Automatically captures and improves your text selections
-- **Image Compression**: Compress images in your notes to save storage space
-- **Flexible Configuration**: Customizable model settings and API configurations
-- **Seamless Integration**: Works natively within Obsidian's interface
+## Why Vibe Writing?
+
+If you want to improve your writing skills through daily practice, you need feedback that helps you grow, not AI that writes for you. Vibe Writing analyzes your text and provides targeted suggestions to enhance your writing abilities, helping you become a better writer over time in any language you choose to practice.
+
+## Demo
+
+![Vibe Writing Demo](./resource/demo4.gif)
+
+### 1. Main Writing Enhancement Pathway
+
+**The core workflow for improving your writing skills:**
+
+`Select your text` → `Call Vibe Writing improvement commands` → `AI responds with suggestions` → `Replace original text with enhanced version`
+
+This is the primary way to enhance your writing skills. The AI analyzes your text and provides specific improvements that help you learn better writing patterns and techniques.
+
+### 2. Create Your Own Custom Prompts
+
+Customize the AI's feedback to focus on specific aspects of writing you want to improve:
+- Grammar and syntax corrections
+- Vocabulary enhancement suggestions
+- Clarity and coherence improvements
+- Style and tone adjustments
+- Structure and flow optimization
+
+Create personalized prompts that target your specific writing weaknesses and learning goals.
+
+### 3. Temporary Chat Mode
+
+Engage in conversations with the AI without modifying your notes. Perfect for:
+- Getting writing advice and tips
+- Brainstorming ideas before writing
+- Understanding grammar rules and writing principles
+- Asking questions about writing techniques
+- Getting feedback on writing concepts
+
+### Getting Started
+
+1. **Select text** in your note that you want to improve
+2. **Open command palette** (Ctrl/Cmd + P)
+3. **Search for "Vibe Writing"** commands
+4. **Choose your improvement type** and let the AI analyze your writing
+5. **Review suggestions** and replace your text with the improved version
+
+### Available Commands
+
+- **AI: Written Improvement**: Analyze and enhance your selected text
+- **Custom Prompt**: Use your personalized writing improvement prompts
+- **Chat Mode**: Have a conversation with the AI about writing
+
+### Tips for Better Results
+
+- **Be specific**: Select complete sentences or paragraphs for better context
+- **Focus on learning**: Pay attention to the changes the AI suggests to understand writing patterns
+- **Practice regularly**: Use the plugin daily to build consistent writing habits
+- **Customize prompts**: Create prompts that target your specific writing challenges
 
 ## Installation
 
@@ -23,113 +73,43 @@ A powerful AI assistant plugin for Obsidian that helps elevate your writing effi
 
 *Coming soon - plugin is currently in development*
 
-## Configuration
+## Setup
 
-1. Go to Settings → Community Plugins → Vibe Writing
-2. Configure your API keys:
-   - **OpenAI API Key**: For GPT models
-   - **Anthropic API Key**: For Claude models  
-   - **Qwen API Key**: For Qwen/DashScope models
-3. Select your preferred model and adjust settings:
-   - **Model Name**: Choose from available AI models
-   - **Max Tokens**: Set the maximum number of tokens for responses
-   - **Qwen Base URL**: Custom endpoint (default: Alibaba Cloud)
-4. Configure image compression settings:
-   - **Image Compression Quality**: Set compression quality (0.1-1.0)
-   - **Maximum Image Width**: Set max width for compressed images
-   - **Maximum Image Height**: Set max height for compressed images
-
-## Usage
-
-### AI Writing Improvement
-
-1. Select any text in your note
-2. Use the command palette (Ctrl/Cmd + P) and search for "AI: written improvement"
-3. Choose from available improvement options
-4. The AI will enhance your selected text
-
-### Available Commands
-
-- **AI: written improvement**: Improve selected text with AI assistance
-- **Compress Images in Current Note**: Compress all images referenced in the current note
-
-### Image Compression
-
-1. Open any note that contains images
-2. Use the command palette (Ctrl/Cmd + P) and search for "Compress Images in Current Note"
-3. The plugin will automatically find and compress all images in the note
-4. Images are compressed based on your configured quality and size settings
-5. New compressed files are created with compression parameters in the filename
-6. The note content is automatically updated to reference the new compressed images
-7. Original images are preserved unchanged
-
-**Filename Format**: `originalname_compressed_q80_max1920x1080_1280x720.jpg`
-- `q80`: Quality setting (80%)
-- `max1920x1080`: Maximum dimensions configured
-- `1280x720`: Actual dimensions of compressed image
-
-**Supported Image Formats**: JPG, JPEG, PNG, GIF, BMP, WebP (all converted to JPG)
-
-**Compression Settings**:
-- **Quality**: 0.1 (lowest) to 1.0 (highest quality)
-- **Max Width**: Maximum width in pixels (default: 1920px)
-- **Max Height**: Maximum height in pixels (default: 1080px)
-
-## Supported AI Models
-
-The plugin supports various models from different providers:
-
-- **OpenAI**: GPT-3.5, GPT-4, and other OpenAI models
-- **Anthropic**: Claude models
-- **Qwen**: Alibaba's Qwen models via DashScope
-
-## Development
-
-### Building from Source
-
-```bash
-# Clone the repository
-git clone https://github.com/0xundef/vibe-writing.git
-cd vibe-writing
-
-# Install dependencies
-npm install
-
-# Build for development
-npm run dev
-
-# Build for production
-npm run build
-```
-
-### Project Structure
-
-```
-src/
-├── main.ts          # Main plugin file
-├── openai_api.ts    # AI API integrations
-└── settings.ts      # Plugin settings
-```
+1. Go to **Settings → Community Plugins → Vibe Writing**
+2. **Add your API key** for your preferred AI provider:
+   - OpenAI (GPT models)
+   - Anthropic (Claude models)
+   - Qwen (Alibaba's models)
+3. **Choose your model** and adjust settings as needed
+4. **Start writing** and use the commands to improve your text!
 
 ## Requirements
 
 - Obsidian v0.15.0 or higher
-- Valid API key for at least one supported AI provider
+- API key for at least one AI provider (OpenAI, Anthropic, or Qwen)
+
+---
+
+## Start Your Writing Journey
+
+Vibe Writing is designed to be your daily companion in developing better writing skills in any language. Remember:
+
+- **Consistency is key** - Use it daily, even for short writing sessions
+- **Learn from suggestions** - Don't just accept changes, understand why they improve your writing
+- **Focus on growth** - The goal is to become a better writer, not to have perfect text written for you
+
+Happy writing! 📝
+
+## Support the Project
+
+If Vibe Writing helps improve your writing skills, consider supporting its development:
+
+[![Buy Me A Coffee](https://cdn.buymeacoffee.com/buttons/v2/default-violet.png)](https://buymeacoffee.com/0xundef)
 
 ## License
 
 MIT License - see [LICENSE.md](LICENSE.md) for details.
 
-## Author
-
-Created by [Nilis None](https://github.com/0xundef)
-
 ---
 
-## Support the Project
-
-If you find Vibe Writing helpful, consider supporting its development:
-
-[![Buy Me A Coffee](https://cdn.buymeacoffee.com/buttons/v2/default-violet.png)](https://buymeacoffee.com/0xundef)
-
-Your support helps maintain and improve this plugin. Thank you! ☕
+*Created by [0xundef](https://github.com/0xundef)*
