@@ -1,11 +1,11 @@
-.coffee-container {
+.vibe-writing-coffee-container {
     display: flex;
     justify-content: center;
     align-items: center;
     margin: 20px 0;
 }
 
-.coffee-button-img {
+.vibe-writing-coffee-button-img {
     width: 200px;
     max-width: 100%;
     height: auto;
@@ -25,19 +25,19 @@
     color: var(--text-error) !important;
 }
 
-/* AI Prompt Modal Styles */
-.ai-prompt-modal {
+/* Vibe Writing Plugin - AI Prompt Modal Styles */
+.vibe-writing-ai-prompt-modal {
     padding: 20px;
 }
 
-.ai-prompt-modal h2 {
+.vibe-writing-ai-prompt-modal h2 {
     margin-top: 0;
     margin-bottom: 20px;
     color: var(--text-normal);
     font-size: 1.5em;
 }
 
-.ai-prompt-modal label {
+.vibe-writing-ai-prompt-modal label {
     display: block;
     margin-bottom: 5px;
     font-weight: 500;
@@ -45,9 +45,9 @@
     font-size: 14px;
 }
 
-/* Input and Textarea Styles */
-.ai-prompt-modal input,
-.ai-prompt-modal textarea {
+/* Vibe Writing Plugin - Input and Textarea Styles */
+.vibe-writing-ai-prompt-modal input,
+.vibe-writing-ai-prompt-modal textarea {
     padding: 12px 16px;
     font-size: 16px;
     border: 2px solid var(--interactive-accent);
@@ -59,28 +59,28 @@
     font-family: var(--font-text);
 }
 
-.ai-prompt-modal input:focus,
-.ai-prompt-modal textarea:focus {
+.vibe-writing-ai-prompt-modal input:focus,
+.vibe-writing-ai-prompt-modal textarea:focus {
     outline: none;
     border-color: var(--interactive-accent-hover);
     box-shadow: 0 0 0 3px rgba(var(--interactive-accent-rgb), 0.2);
     transform: translateY(-1px);
 }
 
-.ai-prompt-modal input::placeholder,
-.ai-prompt-modal textarea::placeholder {
+.vibe-writing-ai-prompt-modal input::placeholder,
+.vibe-writing-ai-prompt-modal textarea::placeholder {
     color: var(--text-muted);
     opacity: 0.7;
 }
 
-.ai-prompt-modal input:disabled,
-.ai-prompt-modal textarea:disabled {
+.vibe-writing-ai-prompt-modal input:disabled,
+.vibe-writing-ai-prompt-modal textarea:disabled {
     opacity: 0.6;
     cursor: not-allowed;
     background-color: var(--background-secondary);
 }
 
-/* New utility classes and components for no-inline-style compliance */
+/* Vibe Writing Plugin - Utility Classes and Components */
 
 /* Vibe Writing Plugin - Layout utilities */
 .vibe-writing-full-width { width: 100%; }
@@ -93,14 +93,13 @@
 }
 .vibe-writing-gap-10 { gap: 10px; }
 
-/* Vibe Writing Plugin - AIPromptModal specifics */
-.ai-prompt-modal .vibe-writing-response-area {
+/* Vibe Writing Plugin - Modal Specifics */
+.vibe-writing-ai-prompt-modal .vibe-writing-response-area {
     height: 200px;
     resize: vertical;
 }
 
-/* Vibe Writing Plugin - EditSuggestionModal specifics */
-.modal .prompt-textarea {
+.vibe-writing-modal .vibe-writing-prompt-textarea {
     height: 120px;
     resize: vertical;
     min-height: 80px;

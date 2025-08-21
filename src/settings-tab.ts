@@ -102,7 +102,7 @@ export class AiAssistantSettingTab extends PluginSettingTab {
 			cls: "vibe-writing-support-desc",
 		});
 
-		const coffeeContainer = containerEl.createDiv({ cls: "coffee-container" });
+		const coffeeContainer = containerEl.createDiv({ cls: "vibe-writing-coffee-container" });
 		const coffeeLink = coffeeContainer.createEl("a", {
 			href: "https://buymeacoffee.com/0xundef",
 			attr: { target: "_blank", rel: "noopener" },
@@ -112,7 +112,7 @@ export class AiAssistantSettingTab extends PluginSettingTab {
 				src: "https://cdn.buymeacoffee.com/buttons/v2/default-violet.png",
 				alt: "Buy Me A Coffee"
 			},
-			cls: "coffee-button-img"
+			cls: "vibe-writing-coffee-button-img"
 		});
 
 		// Add thank you message

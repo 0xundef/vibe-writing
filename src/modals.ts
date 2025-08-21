@@ -22,7 +22,7 @@ export class AIPromptModal extends Modal {
 	onOpen() {
 		const { contentEl } = this;
 		contentEl.empty();
-		contentEl.addClass("ai-prompt-modal");
+		contentEl.addClass("vibe-writing-ai-prompt-modal");
 
 		// Prompt field
 		const promptContainer = contentEl.createDiv();
@@ -199,7 +199,7 @@ export class EditSuggestionModal extends Modal {
 	onOpen() {
 		const { contentEl } = this;
 		contentEl.empty();
-		contentEl.addClass("edit-suggestion-modal");
+		contentEl.addClass("vibe-writing-modal");
 
 		contentEl.createEl("h2", { text: translate('modal.edit-suggestion') });
 
@@ -230,7 +230,7 @@ export class EditSuggestionModal extends Modal {
 		promptInput.value = this.option.prompt || "";
 		promptInput.addClass("vibe-writing-full-width");
         promptInput.addClass("vibe-writing-mb-20");
-		promptInput.addClass("prompt-textarea");
+		promptInput.addClass("vibe-writing-prompt-textarea");
 
 		// Buttons
         const buttonContainer = contentEl.createDiv();
