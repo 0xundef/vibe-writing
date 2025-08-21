@@ -9,8 +9,15 @@ A writing skills improvement assistant for Obsidian that helps you cultivate dai
 If you want to improve your writing skills through daily practice, you need feedback that helps you grow, not AI that writes for you. Vibe Writing analyzes your text and provides targeted suggestions to enhance your writing abilities, helping you become a better writer over time in any language you choose to practice.
 
 ## Demo
+- Typo or grammar correction
 
-![Vibe Writing Demo](./resource/demo7.gif)
+![Vibe Writing Demo](./resource/demo9.gif)
+
+- Mixed-Language Writing Assistant
+
+When you don't know how to express certain words in your target language (like "冰棍" → "popsicle"), Vibe Writing helps you complete and improve your mixed-language sentences.
+
+![Vibe Writing Demo](./resource/demo10.gif)
 
 ### 1. Main Writing Enhancement Pathway
 
