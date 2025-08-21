@@ -99,6 +99,13 @@
     resize: vertical;
 }
 
+/* Vibe Writing Plugin - EditSuggestionModal specifics */
+.modal .prompt-textarea {
+    height: 120px;
+    resize: vertical;
+    min-height: 80px;
+}
+
 /* Vibe Writing Plugin - Buttons */
 .vibe-writing-btn {
     padding: 8px 16px;

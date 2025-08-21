@@ -72,6 +72,11 @@ export const en: Translations = {
   // Confirmation
   'confirm.delete-suggestion': 'Are you sure you want to delete the suggestion "{name}"?',
   
+  // Validation
+  'validation.name-required': 'Name is required',
+  'validation.description-required': 'Description is required',
+  'validation.prompt-required': 'Prompt is required',
+  
   // Status
   'status.initializing': 'Initializing...',
   'status.ready': 'Ready',

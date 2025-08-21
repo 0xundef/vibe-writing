@@ -272,9 +272,32 @@ export class EditSuggestionModal extends Modal {
 		// saveButton.addEventListener('mouseleave', () => {...});
 
 		saveButton.onclick = async () => {
-			this.option.name = nameInput.value;
-			this.option.description = descInput.value;
-			this.option.prompt = promptInput.value;
+			// Validate required fields
+			const name = nameInput.value.trim();
+			const description = descInput.value.trim();
+			const prompt = promptInput.value.trim();
+			
+			if (!name) {
+				new Notice(translate('validation.name-required') || 'Name is required');
+				nameInput.focus();
+				return;
+			}
+			
+			if (!description) {
+				new Notice(translate('validation.description-required') || 'Description is required');
+				descInput.focus();
+				return;
+			}
+			
+			if (!prompt) {
+				new Notice(translate('validation.prompt-required') || 'Prompt is required');
+				promptInput.focus();
+				return;
+			}
+			
+			this.option.name = name;
+			this.option.description = description;
+			this.option.prompt = prompt;
 			this.onSave(this.option);
 			this.close();
 		};

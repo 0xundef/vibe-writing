@@ -72,6 +72,11 @@ export const zh: Translations = {
   // Confirmation
   'confirm.delete-suggestion': '确定要删除建议 "{name}" 吗？',
   
+  // Validation
+  'validation.name-required': '名称是必填项',
+  'validation.description-required': '描述是必填项',
+  'validation.prompt-required': '提示是必填项',
+  
   // Status
   'status.initializing': '初始化中...',
   'status.ready': '就绪',

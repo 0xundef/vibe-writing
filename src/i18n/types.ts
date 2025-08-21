@@ -78,6 +78,11 @@ export interface Translations {
   // Confirmation
   'confirm.delete-suggestion': string;
   
+  // Validation
+  'validation.name-required': string;
+  'validation.description-required': string;
+  'validation.prompt-required': string;
+  
   // Status
   'status.initializing': string;
   'status.ready': string;
