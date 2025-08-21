@@ -3,7 +3,7 @@
 	"name": "Vibe Writing",
 	"version": "1.0.1",
 	"minAppVersion": "0.15.0",
-	"description": "AI-powered writing assistant for Obsidian, make writing easier and more efficient",
+	"description": "Make writing easier and more efficient.",
 	"author": "0xundef",
 	"authorUrl": "https://github.com/0xundef",
 	"isDesktopOnly": false,
