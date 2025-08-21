@@ -35,50 +35,14 @@ Customize the AI's feedback to focus on specific aspects of writing you want to 
 - Clarity and coherence improvements
 - Style and tone adjustments
 - Structure and flow optimization
+- ...
 
 Create personalized prompts that target your specific writing weaknesses and learning goals.
 
 ### 3. Temporary Chat Mode
 
-Engage in conversations with the AI without modifying your notes. Perfect for:
-- Getting writing advice and tips
-- Brainstorming ideas before writing
-- Understanding grammar rules and writing principles
-- Asking questions about writing techniques
-- Getting feedback on writing concepts
-
-### Getting Started
-
-1. **Select text** in your note that you want to improve
-2. **Open command palette** (Ctrl/Cmd + P)
-3. **Search for "Vibe Writing"** commands
-4. **Choose your improvement type** and let the AI analyze your writing
-5. **Review suggestions** and replace your text with the improved version
-
-### Available Commands
-
-- **AI: Written Improvement**: Analyze and enhance your selected text
-- **Custom Prompt**: Use your personalized writing improvement prompts
-- **Chat Mode**: Have a conversation with the AI about writing
-
-### Tips for Better Results
-
-- **Be specific**: Select complete sentences or paragraphs for better context
-- **Focus on learning**: Pay attention to the changes the AI suggests to understand writing patterns
-- **Practice regularly**: Use the plugin daily to build consistent writing habits
-- **Customize prompts**: Create prompts that target your specific writing challenges
-
-## Installation
-
-### Manual Installation
-
-1. Download the latest release from the releases page
-2. Extract the files to your Obsidian plugins folder: `<vault>/.obsidian/plugins/vibe-writing/`
-3. Reload Obsidian or enable the plugin in Settings → Community Plugins
-
-### From Obsidian Community Plugins
-
-*Coming soon - plugin is currently in development*
+Engage in conversations with the AI without modifying your notes. 
+![Chat Mode Screenshot](./resource/shot_chat.png)
 
 ## Setup
 
@@ -90,22 +54,6 @@ Engage in conversations with the AI without modifying your notes. Perfect for:
 3. **Choose your model** and adjust settings as needed
 4. **Start writing** and use the commands to improve your text!
 
-## Requirements
-
-- Obsidian v0.15.0 or higher
-- API key for at least one AI provider (OpenAI, Anthropic, or Qwen)
-
----
-
-## Start Your Writing Journey
-
-Vibe Writing is designed to be your daily companion in developing better writing skills in any language. Remember:
-
-- **Consistency is key** - Use it daily, even for short writing sessions
-- **Learn from suggestions** - Don't just accept changes, understand why they improve your writing
-- **Focus on growth** - The goal is to become a better writer, not to have perfect text written for you
-
-Happy writing! 📝
 
 ## Support the Project
 
