@@ -89,7 +89,7 @@ The plugin supports various models from different providers:
 
 ```bash
 # Clone the repository
-git clone https://github.com/nilisnone/vibe-writing.git
+git clone https://github.com/0xundef/vibe-writing.git
 cd vibe-writing
 
 # Install dependencies
@@ -122,7 +122,7 @@ MIT License - see [LICENSE.md](LICENSE.md) for details.
 
 ## Author
 
-Created by [Nilis None](https://github.com/nilisnone)
+Created by [Nilis None](https://github.com/0xundef)
 
 ---
 
@@ -130,6 +130,6 @@ Created by [Nilis None](https://github.com/nilisnone)
 
 If you find Vibe Writing helpful, consider supporting its development:
 
-[![Buy Me A Coffee](https://cdn.buymeacoffee.com/buttons/v2/default-violet.png)](https://buymeacoffee.com/nilisnone)
+[![Buy Me A Coffee](https://cdn.buymeacoffee.com/buttons/v2/default-violet.png)](https://buymeacoffee.com/0xundef)
 
 Your support helps maintain and improve this plugin. Thank you! ☕
