@@ -10,7 +10,7 @@ If you want to improve your writing skills through daily practice, you need feed
 
 ## Demo
 
-![Vibe Writing Demo](./resource/demo4.gif)
+![Vibe Writing Demo](./resource/demo7.gif)
 
 ### 1. Main Writing Enhancement Pathway
 
