@@ -83,7 +83,7 @@ export interface Translations {
   'status.ready': string;
   
   // Modal Titles
-  'modal.edit-suggestion': string;
+  'modal.edit-suggestion': string; // Keep the key name for consistency
   'modal.add-new-prompt': string;
   
   // Default Suggestions

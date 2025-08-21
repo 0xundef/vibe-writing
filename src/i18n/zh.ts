@@ -77,7 +77,7 @@ export const zh: Translations = {
   'status.ready': '就绪',
   
   // Modal Titles
-  'modal.edit-suggestion': '编辑建议',
+  'modal.edit-suggestion': '编辑提示', // Changed from '编辑建议'
   'modal.add-new-prompt': '添加新提示',
   
   // Default Suggestions

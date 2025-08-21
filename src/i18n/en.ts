@@ -77,7 +77,7 @@ export const en: Translations = {
   'status.ready': 'Ready',
   
   // Modal Titles
-  'modal.edit-suggestion': 'Edit Suggestion',
+  'modal.edit-suggestion': 'Edit Prompt', // Changed from 'Edit Suggestion'
   'modal.add-new-prompt': 'Add New Prompt',
   
   // Default Suggestions

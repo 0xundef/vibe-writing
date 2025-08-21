@@ -197,7 +197,7 @@ export class EditSuggestionModal extends Modal {
 		option: ImprovementOption,
 		onSave: (updatedOption: ImprovementOption) => void,
 		onDelete?: (optionId: string) => void,
-		title: string = "Edit Suggestion",
+		title: string = "Edit Prompt", // Changed from "Edit Suggestion"
 	) {
 		super(app);
 		this.plugin = plugin;
@@ -251,18 +251,34 @@ export class EditSuggestionModal extends Modal {
 		const buttonContainer = contentEl.createDiv();
 		buttonContainer.style.display = "flex";
 		buttonContainer.style.gap = "10px";
-		buttonContainer.style.justifyContent = "space-between";
+		buttonContainer.style.justifyContent = "flex-end";
 
-		// Left side - Delete button (if onDelete callback provided)
-		const leftButtonContainer = buttonContainer.createDiv();
+		// Delete button with plain styling
 		if (this.onDelete) {
-			const deleteButton = leftButtonContainer.createEl("button", {
+			const deleteButton = buttonContainer.createEl("button", {
 				text: translate('ui.delete'),
 			});
-			deleteButton.style.backgroundColor = "var(--interactive-accent)";
-			deleteButton.style.color = "var(--text-on-accent)";
+			// Plain button styling
+			deleteButton.style.padding = "8px 16px";
+			deleteButton.style.fontSize = "14px";
+			deleteButton.style.backgroundColor = "transparent";
+			deleteButton.style.color = "var(--text-muted)";
+			deleteButton.style.border = "1px solid var(--background-modifier-border)";
+			deleteButton.style.borderRadius = "4px";
+			deleteButton.style.cursor = "pointer";
+			deleteButton.style.transition = "all 0.2s ease";
+			
+			// Hover effect for delete button
+			deleteButton.addEventListener('mouseenter', () => {
+				deleteButton.style.backgroundColor = "var(--background-modifier-hover)";
+				deleteButton.style.color = "var(--text-normal)";
+			});
+			deleteButton.addEventListener('mouseleave', () => {
+				deleteButton.style.backgroundColor = "transparent";
+				deleteButton.style.color = "var(--text-muted)";
+			});
+			
 			deleteButton.onclick = () => {
-				// Confirm deletion
 				const confirmed = confirm(
 					translate('confirm.delete-suggestion', { name: this.option.name }),
 				);
@@ -273,14 +289,29 @@ export class EditSuggestionModal extends Modal {
 			};
 		}
 
-		// Right side - Save button
-		const rightButtonContainer = buttonContainer.createDiv();
-		rightButtonContainer.style.display = "flex";
-		rightButtonContainer.style.gap = "10px";
-
-		const saveButton = rightButtonContainer.createEl("button", {
+		// Save button with edit button styling (purple/accent)
+		const saveButton = buttonContainer.createEl("button", {
 			text: translate('ui.save'),
 		});
+		// Match the edit button styling from suggester
+		saveButton.style.padding = "8px 16px";
+		saveButton.style.fontSize = "14px";
+		saveButton.style.backgroundColor = "var(--interactive-accent)";
+		saveButton.style.color = "var(--text-on-accent)";
+		saveButton.style.border = "none";
+		saveButton.style.borderRadius = "4px";
+		saveButton.style.cursor = "pointer";
+		saveButton.style.fontWeight = "500";
+		saveButton.style.transition = "all 0.2s ease";
+		
+		// Hover effect for save button
+		saveButton.addEventListener('mouseenter', () => {
+			saveButton.style.opacity = "0.8";
+		});
+		saveButton.addEventListener('mouseleave', () => {
+			saveButton.style.opacity = "1";
+		});
+		
 		saveButton.onclick = async () => {
 			this.option.name = nameInput.value;
 			this.option.description = descInput.value;
