@@ -86,20 +86,17 @@ export class AIPromptModal extends Modal {
 			return;
 		}
 
-		// Show loading state
 		this.promptInput.disabled = true;
 		this.promptInput.placeholder = translate(
 			"placeholder.generating-response",
 		);
 
 		try {
-			// Build the prompt with selected text if available
 			let fullPrompt = prompt;
 			if (this.selectedText) {
 				fullPrompt = `${prompt}\n\nSelected text:\n${this.selectedText}`;
 			}
 
-			// Build the API client
 			this.plugin.build_api();
 			if (!this.plugin.aiAssistant) {
 				new Notice(translate("notice.api-not-configured"));
@@ -244,11 +241,6 @@ export class EditSuggestionModal extends Modal {
 			});
 			deleteButton.addClass("vibe-writing-btn");
 			deleteButton.addClass("vibe-writing-btn-plain");
-
-			// Remove JS hover styling; CSS will handle :hover
-			// deleteButton.addEventListener('mouseenter', () => {...});
-			// deleteButton.addEventListener('mouseleave', () => {...});
-
 			deleteButton.onclick = () => {
 				const confirmed = confirm(
 					translate("confirm.delete-suggestion", {
