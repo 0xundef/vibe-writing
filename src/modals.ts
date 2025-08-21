@@ -145,9 +145,15 @@ export class AIPromptModal extends Modal {
 			return;
 		}
 
+		// Normalize text to ensure proper line breaks and remove any formatting artifacts
+		const normalizedText = responseText
+			.replace(/\r\n/g, '\n') // Convert Windows line endings
+			.replace(/\r/g, '\n')   // Convert Mac line endings
+			.replace(/\n{3,}/g, '\n\n'); // Limit consecutive line breaks to max 2
+
 		// Copy to clipboard
 		navigator.clipboard
-			.writeText(responseText)
+			.writeText(normalizedText)
 			.then(() => {
 				new Notice(translate("notice.copied-to-clipboard"));
 			})
@@ -155,7 +161,11 @@ export class AIPromptModal extends Modal {
 				console.error("Failed to copy text: ", err);
 				// Fallback for older browsers
 				const textArea = document.createElement("textarea");
-				textArea.value = responseText;
+				textArea.value = normalizedText;
+				textArea.style.position = 'fixed';
+				textArea.style.left = '-9999px';
+				textArea.style.width = '1px';
+				textArea.style.height = '1px';
 				document.body.appendChild(textArea);
 				textArea.select();
 				document.execCommand("copy");

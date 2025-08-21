@@ -97,6 +97,9 @@
 .vibe-writing-ai-prompt-modal .vibe-writing-response-area {
     height: 200px;
     resize: vertical;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .vibe-writing-modal .vibe-writing-prompt-textarea {
