@@ -9,11 +9,16 @@ A writing skills improvement assistant for Obsidian that helps you cultivate dai
 If you want to improve your writing skills through daily practice, you need feedback that helps you grow, not AI that writes for you. Vibe Writing analyzes your text and provides targeted suggestions to enhance your writing abilities, helping you become a better writer over time in any language you choose to practice.
 
 ## Demo
-- Typo or grammar correction
+
+### Grammar & Typo Correction
+
+Instantly fix grammar mistakes and typos in your writing. Simply select the text with errors, run the command, and get corrected text with clear highlighting of changes.
+
+**Example:** "This is an big fish" → "This is a big fish"
 
 ![Vibe Writing Demo](./resource/demo9.gif)
 
-- Mixed-Language Writing Assistant
+### Mixed-Language Writing Assistant
 
 When you don't know how to express certain words in your target language (like "冰棍" → "popsicle"), Vibe Writing helps you complete and improve your mixed-language sentences.
 
@@ -39,11 +44,6 @@ Customize the AI's feedback to focus on specific aspects of writing you want to 
 
 Create personalized prompts that target your specific writing weaknesses and learning goals.
 
-### 3. Temporary Chat Mode
-
-Engage in conversations with the AI without modifying your notes. 
-![Chat Mode Screenshot](./resource/shot_chat.png)
-
 ## Setup
 
 1. Go to **Settings → Community Plugins → Vibe Writing**
@@ -60,11 +60,3 @@ Engage in conversations with the AI without modifying your notes.
 If Vibe Writing helps improve your writing skills, consider supporting its development:
 
 [![Buy Me A Coffee](https://cdn.buymeacoffee.com/buttons/v2/default-violet.png)](https://buymeacoffee.com/0xundef)
-
-## License
-
-MIT License - see [LICENSE.md](LICENSE.md) for details.
-
----
-
-*Created by [0xundef](https://github.com/0xundef)*

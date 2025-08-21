@@ -134,6 +134,7 @@ export default class AiAssistantPlugin extends Plugin {
 			});
 
 			// Add command to open edit modal
+			/*
 			this.addCommand({
 				id: "one-shot-chat",
 				name: translate("command.one-shot-chat"),
@@ -141,7 +142,7 @@ export default class AiAssistantPlugin extends Plugin {
 					const activeView =
 						this.app.workspace.getActiveViewOfType(MarkdownView);
 					let initialContent = "";
-
+			
 					// If there's a text selection, use it as initial content
 					if (activeView && activeView.editor) {
 						const selection = activeView.editor.getSelection();
@@ -149,7 +150,7 @@ export default class AiAssistantPlugin extends Plugin {
 							initialContent = selection;
 						}
 					}
-
+			
 					const aiModal = new AIPromptModal(
 						this.app,
 						this,
@@ -158,7 +159,8 @@ export default class AiAssistantPlugin extends Plugin {
 					aiModal.open();
 				},
 			});
-
+			*/
+			
 			// Add command to replace original text with last AI response
 			this.addCommand({
 				id: "replace-with-ai",
