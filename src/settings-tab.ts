@@ -22,7 +22,7 @@ export class AiAssistantSettingTab extends PluginSettingTab {
 		containerEl.createEl("h2", { text: translate('ui.settings-title') });
 
 		// Model Configuration Section
-		containerEl.createEl("h3", { text: "Model Configuration" });
+		containerEl.createEl("h3", { text: "Model configuration" }); // Line 25
 
 		new Setting(containerEl)
 			.setName(translate('settings.model'))
@@ -95,7 +95,7 @@ export class AiAssistantSettingTab extends PluginSettingTab {
 		// this.imageSettingsManager.addImageSettings(containerEl);
 
 		// Support Section
-		containerEl.createEl("h3", { text: "Support the Project" });
+		containerEl.createEl("h3", { text: "Support the project" }); // Line 98
 		
 		const supportDesc = containerEl.createEl("p", {
 			text: "If you find Vibe Writing helpful, consider supporting its development:"

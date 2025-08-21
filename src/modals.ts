@@ -237,15 +237,16 @@ export class EditSuggestionModal extends Modal {
 		// Prompt field
 		const promptContainer = contentEl.createDiv();
 		promptContainer.createEl("label", { text: translate('ui.prompt') });
+		// Around lines 241-248, remove debug logs:
 		const promptInput = promptContainer.createEl("textarea");
-		console.log("Option prompt:", this.option.prompt);
+		// Remove: console.log("Option prompt:", this.option.prompt);
 		// Set value after element creation
 		promptInput.value = this.option.prompt || "";
 		promptInput.style.width = "100%";
 		promptInput.style.height = "150px";
 		promptInput.style.marginBottom = "20px";
-		console.log("Textarea value after setting:", promptInput.value);
-		console.log("Textarea element:", promptInput);
+		// Remove: console.log("Textarea value after setting:", promptInput.value);
+		// Remove: console.log("Textarea element:", promptInput);
 
 		// Buttons
 		const buttonContainer = contentEl.createDiv();

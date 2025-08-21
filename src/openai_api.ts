@@ -61,10 +61,12 @@ export class OpenAIAssistant {
 					const content = chunk.choices[0].delta.content;
 					if (content) {
 						responseText = responseText.concat(content);
-						htmlEl.innerHTML = responseText;
+						// SECURITY FIX: Replace innerHTML with textContent
+						htmlEl.textContent = responseText;
 					}
 				}
-				return htmlEl.innerHTML;
+				// SECURITY FIX: Replace innerHTML with textContent
+				return htmlEl.textContent || "";
 			} else {
 				return response.choices[0].message.content;
 			}

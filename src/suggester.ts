@@ -188,9 +188,10 @@ export class ImprovementSuggester extends SuggestModal<ImprovementOption> {
 				);
 			});
 
+			// Around line 192, remove the debug log:
 			const prompt = `${option.prompt}\n\n${this.plugin.lastSelection.text}`;
-			console.log(prompt);
-
+			// Remove: console.log(prompt);
+			
 			// Race between API call and timeout
 			const apiCallPromise = this.plugin.aiAssistant.text_api_call([
 				{

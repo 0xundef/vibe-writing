@@ -1,5 +1,4 @@
 import {
-	App,
 	MarkdownView,
 	Notice,
 	Plugin,
@@ -15,14 +14,6 @@ import { AIPromptModal, EditSuggestionModal } from "./modals";
 import { ImprovementSuggester } from "./suggester";
 import { AiAssistantSettingTab } from "./settings-tab";
 import { translate, initializeLanguage } from "./i18n/language-manager";
-
-
-
-
-
-
-
-
 
 export default class AiAssistantPlugin extends Plugin {
 	settings: AiAssistantSettings;
@@ -59,14 +50,14 @@ export default class AiAssistantPlugin extends Plugin {
 	}
 
 	async onload() {
-		console.log("🚀 AI Assistant Plugin: Starting to load...");
-
+		// Remove debug console.log
+		
 		try {
 			await this.loadSettings();
-
+		
 			// Initialize language manager
 			initializeLanguage(this.settings.language);
-
+		
 			// Initialize suggestions if empty
 			if (
 				!this.settings.suggestions ||
@@ -75,33 +66,22 @@ export default class AiAssistantPlugin extends Plugin {
 				this.settings.suggestions = this.getDefaultSuggestions();
 				await this.saveSettings();
 			}
-			console.log(
-				"✅ AI Assistant Plugin: Settings loaded successfully",
-				{
-					modelName: this.settings.modelName,
-					imageModelName: this.settings.imageModelName,
-					maxTokens: this.settings.maxTokens,
-					hasOpenAIKey: !!this.settings.openAIapiKey,
-					hasAnthropicKey: !!this.settings.anthropicApiKey,
-					hasQwenKey: !!this.settings.qwenApiKey,
-					qwenBaseURL: this.settings.qwenBaseURL,
-				},
-			);
-
+			// Remove the orphaned object literal completely (lines 70-80)
+			
 			this.build_api();
-			console.log(
-				"✅ AI Assistant Plugin: API client built successfully",
-			);
-
+			// Also remove this console.log for production
+			// Line 83 - Remove this debug log:
+			// console.log("✅ AI Assistant Plugin: API client built successfully");
+			
 			// Add status bar item
 			this.statusBarItem = this.addStatusBarItem();
 			this.updateStatusBar(translate('status.initializing'));
-
+	
 			// Set to ready after initialization
 			setTimeout(() => {
 				this.updateStatusBar(translate('status.ready'));
 			}, 100);
-
+	
 			// Add command to improve previous selection with suggester
 			this.addCommand({
 				id: "ai-written",
@@ -113,13 +93,13 @@ export default class AiAssistantPlugin extends Plugin {
 						);
 						return;
 					}
-
+	
 					// Open suggester modal to choose improvement type
 					const suggester = new ImprovementSuggester(this.app, this);
 					suggester.open();
 				},
 			});
-
+	
 			// Add command to compress images
 			// this.addCommand({
 			// 	id: "compress-image",
@@ -128,7 +108,7 @@ export default class AiAssistantPlugin extends Plugin {
 			// 		await this.compressImagesInCurrentNote();
 			// 	},
 			// });
-
+	
 			// Add command to create new prompt
 			this.addCommand({
 				id: "new-prompt",
@@ -141,7 +121,7 @@ export default class AiAssistantPlugin extends Plugin {
 						description: "",
 						prompt: "",
 					};
-
+	
 					// Open edit modal for the new prompt
 					const editModal = new EditSuggestionModal(
 						this.app,
@@ -168,7 +148,7 @@ export default class AiAssistantPlugin extends Plugin {
 					editModal.open();
 				},
 			});
-
+	
 			// Add command to open edit modal
 			this.addCommand({
 				id: "one-shot-chat",
@@ -177,7 +157,7 @@ export default class AiAssistantPlugin extends Plugin {
 					const activeView =
 						this.app.workspace.getActiveViewOfType(MarkdownView);
 					let initialContent = "";
-
+	
 					// If there's a text selection, use it as initial content
 					if (activeView && activeView.editor) {
 						const selection = activeView.editor.getSelection();
@@ -185,7 +165,7 @@ export default class AiAssistantPlugin extends Plugin {
 							initialContent = selection;
 						}
 					}
-
+	
 					const aiModal = new AIPromptModal(
 						this.app,
 						this,
@@ -194,7 +174,7 @@ export default class AiAssistantPlugin extends Plugin {
 					aiModal.open();
 				},
 			});
-
+	
 			// Add command to replace original text with last AI response
 			this.addCommand({
 				id: "replace-with-ai",
@@ -206,19 +186,19 @@ export default class AiAssistantPlugin extends Plugin {
 						);
 						return;
 					}
-
+	
 					if (!this.lastAiResponse) {
 						new Notice(
 							translate('notice.no-ai-response'),
 						);
 						return;
 					}
-
+	
 					if (!this.lastSelection.editor) {
 						new Notice(translate('notice.editor-not-available'));
 						return;
 					}
-
+	
 					// First delete the quote block if it exists
 					if (
 						this.lastQuoteBlockRange &&
@@ -232,14 +212,14 @@ export default class AiAssistantPlugin extends Plugin {
 						// Clear the quote block range after deletion
 						this.lastQuoteBlockRange = null;
 					}
-
+	
 					// Then replace the original text with the AI response
 					this.lastSelection.editor.replaceRange(
 						this.lastAiResponse,
 						this.lastSelection.from,
 						this.lastSelection.to,
 					);
-
+	
 					// Calculate the end position of the newly inserted text
 					const newTextEnd = {
 						line:
@@ -253,24 +233,24 @@ export default class AiAssistantPlugin extends Plugin {
 								: this.lastAiResponse.split("\n").pop()
 										?.length || 0,
 					};
-
+	
 					// Select the newly inserted text to highlight it
 					this.lastSelection.editor.setSelection(
 						this.lastSelection.from,
 						newTextEnd,
 					);
-
+	
 					new Notice("Text replaced with AI response!");
 				},
 			});
-
+	
 			// Register event to capture text selections
 			this.registerDomEvent(document, "selectionchange", () => {
 				this.captureSelection();
 			});
-
+	
 			this.addSettingTab(new AiAssistantSettingTab(this.app, this));
-
+	
 			console.log(
 				"🎉 AI Assistant Plugin: Successfully loaded with all commands and settings!",
 			);
@@ -281,7 +261,8 @@ export default class AiAssistantPlugin extends Plugin {
 	}
 
 	onunload() {
-		console.log("🔌 AI Assistant Plugin: Unloaded!");
+		// Remove: console.log("🔌 AI Assistant Plugin: Unloaded!");
+		// Add any cleanup code if needed
 	}
 
 	updateStatusBar(status: string) {
