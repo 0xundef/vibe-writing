@@ -159,18 +159,7 @@ export class AIPromptModal extends Modal {
 			})
 			.catch((err) => {
 				console.error("Failed to copy text: ", err);
-				// Fallback for older browsers
-				const textArea = document.createElement("textarea");
-				textArea.value = normalizedText;
-				textArea.style.position = 'fixed';
-				textArea.style.left = '-9999px';
-				textArea.style.width = '1px';
-				textArea.style.height = '1px';
-				document.body.appendChild(textArea);
-				textArea.select();
-				document.execCommand("copy");
-				document.body.removeChild(textArea);
-				new Notice(translate("notice.copied-to-clipboard"));
+				new Notice(translate("notice.copy-failed"));
 			});
 	}
 

@@ -21,6 +21,7 @@ export interface Translations {
   'notice.please-enter-prompt': string;
   'notice.generating-response': string;
   'notice.copied-to-clipboard': string;
+  'notice.copy-failed': string;
   
   // UI Labels
   'ui.name': string;

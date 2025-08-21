@@ -23,6 +23,7 @@ export const en: Translations = {
   'notice.please-enter-prompt': 'Please enter a prompt',
   'notice.generating-response': 'Generating response...',
   'notice.copied-to-clipboard': 'Response copied to clipboard!',
+  'notice.copy-failed': 'Failed to copy to clipboard',
   
   // UI Labels
   'ui.name': 'Name:',
