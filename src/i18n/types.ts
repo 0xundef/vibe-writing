@@ -20,6 +20,7 @@ export interface Translations {
   'notice.ai-response-added': string;
   'notice.please-enter-prompt': string;
   'notice.generating-response': string;
+  'notice.copied-to-clipboard': string;
   
   // UI Labels
   'ui.name': string;
@@ -27,6 +28,7 @@ export interface Translations {
   'ui.prompt': string;
   'ui.delete': string;
   'ui.save': string;
+  'ui.copy': string;
   'ui.settings-title': string;
   'ui.edit': string;
   'ui.language': string;

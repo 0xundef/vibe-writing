@@ -22,6 +22,7 @@ export const en: Translations = {
   'notice.ai-response-added': 'AI response added using {option}!',
   'notice.please-enter-prompt': 'Please enter a prompt',
   'notice.generating-response': 'Generating response...',
+  'notice.copied-to-clipboard': 'Response copied to clipboard!',
   
   // UI Labels
   'ui.name': 'Name:',
@@ -29,6 +30,7 @@ export const en: Translations = {
   'ui.prompt': 'Prompt:',
   'ui.delete': 'Delete',
   'ui.save': 'Save',
+  'ui.copy': 'Copy',
   'ui.settings-title': 'AI Assistant Settings',
   'ui.edit': 'edit',
   'ui.language': 'Language',

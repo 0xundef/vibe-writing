@@ -38,10 +38,43 @@ export class AIPromptModal extends Modal {
 		this.responseArea = responseContainer.createEl("textarea");
 		this.responseArea.style.width = "100%";
 		this.responseArea.style.height = "200px";
-		this.responseArea.style.marginBottom = "20px";
+		this.responseArea.style.marginBottom = "10px";
 		this.responseArea.style.resize = "vertical";
 		this.responseArea.placeholder = translate('placeholder.ai-response');
 		this.responseArea.readOnly = true;
+
+		// Button container for better layout
+		const buttonContainer = contentEl.createDiv();
+		buttonContainer.style.display = "flex";
+		buttonContainer.style.justifyContent = "flex-end";
+		buttonContainer.style.marginTop = "10px";
+
+		// Copy button
+		const copyButton = buttonContainer.createEl("button", {
+			text: translate('ui.copy'),
+		});
+		copyButton.style.padding = "8px 16px";
+		copyButton.style.fontSize = "14px";
+		copyButton.style.backgroundColor = "var(--interactive-accent)";
+		copyButton.style.color = "var(--text-on-accent)";
+		copyButton.style.border = "none";
+		copyButton.style.borderRadius = "6px";
+		copyButton.style.cursor = "pointer";
+		copyButton.style.fontWeight = "500";
+		copyButton.style.transition = "opacity 0.2s";
+
+		// Hover effect
+		copyButton.addEventListener("mouseenter", () => {
+			copyButton.style.opacity = "0.8";
+		});
+		copyButton.addEventListener("mouseleave", () => {
+			copyButton.style.opacity = "1";
+		});
+
+		// Copy button click handler
+		copyButton.addEventListener("click", () => {
+			this.copyResponse();
+		});
 
 		// Focus the input
 		setTimeout(() => {
@@ -116,6 +149,29 @@ export class AIPromptModal extends Modal {
 			// Clear input for next prompt
 			this.promptInput.value = "";
 		}
+	}
+
+	copyResponse() {
+		const responseText = this.responseArea.value.trim();
+		if (!responseText) {
+			new Notice(translate('placeholder.ai-response'));
+			return;
+		}
+
+		// Copy to clipboard
+		navigator.clipboard.writeText(responseText).then(() => {
+			new Notice(translate('notice.copied-to-clipboard'));
+		}).catch((err) => {
+			console.error('Failed to copy text: ', err);
+			// Fallback for older browsers
+			const textArea = document.createElement('textarea');
+			textArea.value = responseText;
+			document.body.appendChild(textArea);
+			textArea.select();
+			document.execCommand('copy');
+			document.body.removeChild(textArea);
+			new Notice(translate('notice.copied-to-clipboard'));
+		});
 	}
 
 	displayResponse(response: string) {

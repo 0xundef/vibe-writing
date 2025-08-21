@@ -121,13 +121,13 @@ export default class AiAssistantPlugin extends Plugin {
 			});
 
 			// Add command to compress images
-			this.addCommand({
-				id: "compress-image",
-				name: translate('command.compress-images'),
-				callback: async () => {
-					await this.compressImagesInCurrentNote();
-				},
-			});
+			// this.addCommand({
+			// 	id: "compress-image",
+			// 	name: translate('command.compress-images'),
+			// 	callback: async () => {
+			// 		await this.compressImagesInCurrentNote();
+			// 	},
+			// });
 
 			// Add command to create new prompt
 			this.addCommand({

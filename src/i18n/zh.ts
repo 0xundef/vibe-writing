@@ -22,6 +22,7 @@ export const zh: Translations = {
   'notice.ai-response-added': '已使用{option}添加AI回复！',
   'notice.please-enter-prompt': '请输入提示',
   'notice.generating-response': '正在生成回复...',
+  'notice.copied-to-clipboard': '回复已复制到剪贴板！',
   
   // UI Labels
   'ui.name': '名称：',
@@ -29,6 +30,7 @@ export const zh: Translations = {
   'ui.prompt': '提示：',
   'ui.delete': '删除',
   'ui.save': '保存',
+  'ui.copy': '复制',
   'ui.settings-title': 'AI助手设置',
   'ui.edit': '编辑',
   'ui.language': '语言',

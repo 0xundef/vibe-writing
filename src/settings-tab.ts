@@ -1,7 +1,7 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
 import type AiAssistantPlugin from "./main";
 import { ALL_MODELS } from "./settings";
-import { translate, setLanguage, getAvailableLanguages } from "./i18n/language-manager";
+import { translate } from "./i18n/language-manager"; // Remove setLanguage and getAvailableLanguages
 import { ImageSettingsManager } from "./image-settings";
 
 export class AiAssistantSettingTab extends PluginSettingTab {
@@ -20,84 +20,6 @@ export class AiAssistantSettingTab extends PluginSettingTab {
 		containerEl.empty();
 
 		containerEl.createEl("h2", { text: translate('ui.settings-title') });
-
-		// Core Settings Section
-		containerEl.createEl("h3", { text: "Core Settings" });
-
-		// Language setting
-		new Setting(containerEl)
-			.setName(translate('settings.language'))
-			.setDesc(translate('settings.language-desc'))
-			.addDropdown((dropdown) => {
-				const languages = getAvailableLanguages();
-				languages.forEach((lang) => {
-					dropdown.addOption(lang.code, lang.name);
-				});
-				dropdown
-					.setValue(this.plugin.settings.language || 'en')
-					.onChange(async (value) => {
-						this.plugin.settings.language = value;
-						await this.plugin.saveSettings();
-						setLanguage(value);
-						// Refresh the settings tab to show updated translations
-						this.display();
-					});
-			});
-
-		// API Configuration Section
-		containerEl.createEl("h3", { text: "API Configuration" });
-
-		new Setting(containerEl)
-			.setName(translate('settings.openai-key'))
-			.setDesc(translate('settings.openai-key-desc'))
-			.addText((text) =>
-				text
-					.setPlaceholder(translate('placeholder.api-key'))
-					.setValue(this.plugin.settings.openAIapiKey)
-					.onChange(async (value) => {
-						this.plugin.settings.openAIapiKey = value;
-						await this.plugin.saveSettings();
-					}),
-			);
-
-		new Setting(containerEl)
-			.setName(translate('settings.anthropic-key'))
-			.setDesc(translate('settings.anthropic-key-desc'))
-			.addText((text) =>
-				text
-					.setPlaceholder(translate('placeholder.api-key'))
-					.setValue(this.plugin.settings.anthropicApiKey)
-					.onChange(async (value) => {
-						this.plugin.settings.anthropicApiKey = value;
-						await this.plugin.saveSettings();
-					}),
-			);
-
-		new Setting(containerEl)
-			.setName(translate('settings.qwen-key'))
-			.setDesc(translate('settings.qwen-key-desc'))
-			.addText((text) =>
-				text
-					.setPlaceholder(translate('placeholder.api-key'))
-					.setValue(this.plugin.settings.qwenApiKey)
-					.onChange(async (value) => {
-						this.plugin.settings.qwenApiKey = value;
-						await this.plugin.saveSettings();
-					}),
-			);
-
-		new Setting(containerEl)
-			.setName(translate('settings.qwen-base-url'))
-			.setDesc(translate('settings.qwen-base-url-desc'))
-			.addText((text) =>
-				text
-					.setPlaceholder(translate('placeholder.base-url'))
-					.setValue(this.plugin.settings.qwenBaseURL)
-					.onChange(async (value) => {
-						this.plugin.settings.qwenBaseURL = value;
-						await this.plugin.saveSettings();
-					}),
-			);
 
 		// Model Configuration Section
 		containerEl.createEl("h3", { text: "Model Configuration" });
@@ -130,6 +52,41 @@ export class AiAssistantSettingTab extends PluginSettingTab {
 							this.plugin.settings.maxTokens = numValue;
 							await this.plugin.saveSettings();
 						}
+					}),
+			);
+
+		// Add Base URI setting
+		new Setting(containerEl)
+			.setName("Base URI")
+			.setDesc("Base URI for API requests (leave empty for default)")
+			.addText((text) =>
+				text
+					.setPlaceholder("https://api.openai.com/v1")
+					.setValue(this.plugin.settings.qwenBaseURL || "")
+					.onChange(async (value) => {
+						this.plugin.settings.qwenBaseURL = value;
+						await this.plugin.saveSettings();
+					}),
+			);
+
+		// Add API Key setting
+		new Setting(containerEl)
+			.setName("API Key")
+			.setDesc("API key for the selected model")
+			.addText((text) =>
+				text
+					.setPlaceholder("Enter your API key")
+					.setValue(this.plugin.settings.openAIapiKey || this.plugin.settings.anthropicApiKey || this.plugin.settings.qwenApiKey || "")
+					.onChange(async (value) => {
+						// Update the appropriate API key based on selected model
+						if (this.plugin.settings.modelName.includes("claude")) {
+							this.plugin.settings.anthropicApiKey = value;
+						} else if (this.plugin.settings.modelName.includes("qwen")) {
+							this.plugin.settings.qwenApiKey = value;
+						} else {
+							this.plugin.settings.openAIapiKey = value;
+						}
+						await this.plugin.saveSettings();
 					}),
 			);
 
