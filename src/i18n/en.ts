@@ -5,7 +5,7 @@ export const en: Translations = {
   'command.written-improvement': 'Written improvement',
   'command.compress-images': 'Compress Image in Current Note',
   'command.new-prompt': 'New prompt',
-  'command.one-shot-chat': 'One shot chat',
+  'command.one-shot-chat': 'Shot chat',
   'command.replace-ai-response': 'Replace with last AI response',
   
   // Notices

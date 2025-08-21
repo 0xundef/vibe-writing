@@ -5,7 +5,7 @@ export const zh: Translations = {
   'command.written-improvement': '写作改进',
   'command.compress-images': '压缩当前笔记中的图片',
   'command.new-prompt': '新建提示',
-  'command.one-shot-chat': '单次对话',
+  'command.one-shot-chat': '对话',
   'command.replace-ai-response': '替换为上次AI回复',
   
   // Notices
