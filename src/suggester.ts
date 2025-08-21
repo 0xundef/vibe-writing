@@ -54,17 +54,19 @@ export class ImprovementSuggester extends SuggestModal<ImprovementOption> {
 		el.addClass("suggestion-item");
 
 		// Create a container for the suggestion content
-		const contentContainer = el.createDiv({ cls: "suggestion-content" });
-		contentContainer.style.display = "flex";
-		contentContainer.style.justifyContent = "space-between";
-		contentContainer.style.alignItems = "center";
-		contentContainer.style.width = "100%";
+		const contentContainer = el.createDiv({ cls: "vibe-writing-suggestion-content" });
+
+		// Remove inline style; use CSS classes instead
+		// contentContainer.style.display = "flex";
+		// contentContainer.style.justifyContent = "space-between";
+		// contentContainer.style.alignItems = "center";
+		// contentContainer.style.width = "100%";
 
 		// Left side: suggestion info
 		const infoContainer = contentContainer.createDiv({
-			cls: "suggestion-info",
+			cls: "vibe-writing-suggestion-info",
 		});
-		infoContainer.style.flex = "1";
+		// infoContainer.style.flex = "1";
 		infoContainer.createEl("div", {
 			text: option.name,
 			cls: "suggestion-title",
@@ -77,16 +79,17 @@ export class ImprovementSuggester extends SuggestModal<ImprovementOption> {
 		// Right side: edit button
 		const editButton = contentContainer.createEl("button", {
 			text: translate("ui.edit"),
-			cls: "suggestion-edit-btn",
+			cls: "vibe-writing-suggestion-edit-btn",
 		});
-		editButton.style.marginLeft = "10px";
-		editButton.style.padding = "2px 8px";
-		editButton.style.fontSize = "12px";
-		editButton.style.backgroundColor = "var(--interactive-accent)";
-		editButton.style.color = "var(--text-on-accent)";
-		editButton.style.border = "none";
-		editButton.style.borderRadius = "4px";
-		editButton.style.cursor = "pointer";
+		// Remove inline styles; CSS class handles visuals
+		// editButton.style.marginLeft = "10px";
+		// editButton.style.padding = "2px 8px";
+		// editButton.style.fontSize = "12px";
+		// editButton.style.backgroundColor = "var(--interactive-accent)";
+		// editButton.style.color = "var(--text-on-accent)";
+		// editButton.style.border = "none";
+		// editButton.style.borderRadius = "4px";
+		// editButton.style.cursor = "pointer";
 
 		editButton.onclick = (e) => {
 			e.preventDefault();

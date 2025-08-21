@@ -96,34 +96,29 @@ export class AiAssistantSettingTab extends PluginSettingTab {
 
 		// Support Section
 		containerEl.createEl("h3", { text: "Support the project" }); // Line 98
-		
-		const supportDesc = containerEl.createEl("p", {
-			text: "If you find Vibe Writing helpful, consider supporting its development:"
-		});
-		supportDesc.style.marginBottom = "15px";
-		supportDesc.style.color = "var(--text-muted)";
 
-		// Create coffee button container
+		const supportDesc = containerEl.createEl("p", {
+			text: "If you find Vibe Writing helpful, consider supporting its development:",
+			cls: "vibe-writing-support-desc",
+		});
+
 		const coffeeContainer = containerEl.createDiv({ cls: "coffee-container" });
-		
-		// Create the coffee button as a clickable link
 		const coffeeLink = coffeeContainer.createEl("a", {
 			href: "https://buymeacoffee.com/0xundef",
-			attr: { target: "_blank", rel: "noopener noreferrer" }
+			attr: { target: "_blank", rel: "noopener" },
 		});
-		
-		// Add the coffee button image
-		const coffeeImg = coffeeLink.createEl("img", {
+		coffeeLink.createEl("img", {
 			attr: {
 				src: "https://cdn.buymeacoffee.com/buttons/v2/default-violet.png",
 				alt: "Buy Me A Coffee"
 			},
 			cls: "coffee-button-img"
 		});
-		
+
 		// Add thank you message
 		const thankYouMsg = containerEl.createEl("p", {
-			text: "Your support helps maintain and improve this plugin. Thank you! ☕"
+			text: "Your support helps maintain and improve this plugin. Thank you! ☕",
+			cls: "vibe-writing-thank-you-msg",
 		});
 		thankYouMsg.style.textAlign = "center";
 		thankYouMsg.style.marginTop = "10px";

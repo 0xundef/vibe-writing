@@ -30,46 +30,35 @@ export class AIPromptModal extends Modal {
 			type: "text",
 			placeholder: translate('placeholder.prompt-input'),
 		});
-		this.promptInput.style.width = "100%";
-		this.promptInput.style.marginBottom = "10px";
+		// Apply classes instead of inline styles
+        this.promptInput.addClass("vibe-writing-full-width");
+        this.promptInput.addClass("vibe-writing-mb-10");
 
 		// Response field
 		const responseContainer = contentEl.createDiv();
 		this.responseArea = responseContainer.createEl("textarea");
-		this.responseArea.style.width = "100%";
-		this.responseArea.style.height = "200px";
-		this.responseArea.style.marginBottom = "10px";
-		this.responseArea.style.resize = "vertical";
+		// Apply classes instead of inline styles
+        this.responseArea.addClass("vibe-writing-full-width");
+        this.responseArea.addClass("vibe-writing-response-area");
+        this.responseArea.addClass("vibe-writing-mb-10");
 		this.responseArea.placeholder = translate('placeholder.ai-response');
 		this.responseArea.readOnly = true;
 
 		// Button container for better layout
-		const buttonContainer = contentEl.createDiv();
-		buttonContainer.style.display = "flex";
-		buttonContainer.style.justifyContent = "flex-end";
-		buttonContainer.style.marginTop = "10px";
+        const buttonContainer = contentEl.createDiv();
+        buttonContainer.addClass("vibe-writing-button-row");
 
 		// Copy button
 		const copyButton = buttonContainer.createEl("button", {
 			text: translate('ui.copy'),
 		});
-		copyButton.style.padding = "8px 16px";
-		copyButton.style.fontSize = "14px";
-		copyButton.style.backgroundColor = "var(--interactive-accent)";
-		copyButton.style.color = "var(--text-on-accent)";
-		copyButton.style.border = "none";
-		copyButton.style.borderRadius = "6px";
-		copyButton.style.cursor = "pointer";
-		copyButton.style.fontWeight = "500";
-		copyButton.style.transition = "opacity 0.2s";
+		// Use class-based styling
+        copyButton.addClass("vibe-writing-btn");
+        copyButton.addClass("vibe-writing-btn-primary");
 
-		// Hover effect
-		copyButton.addEventListener("mouseenter", () => {
-			copyButton.style.opacity = "0.8";
-		});
-		copyButton.addEventListener("mouseleave", () => {
-			copyButton.style.opacity = "1";
-		});
+		// Remove JS hover styling; CSS will handle :hover
+		// copyButton.addEventListener("mouseenter", () => { copyButton.style.opacity = "0.8"; });
+		// copyButton.addEventListener("mouseleave", () => { copyButton.style.opacity = "1"; });
 
 		// Copy button click handler
 		copyButton.addEventListener("click", () => {
@@ -221,8 +210,8 @@ export class EditSuggestionModal extends Modal {
 			type: "text",
 			value: this.option.name,
 		});
-		nameInput.style.width = "100%";
-		nameInput.style.marginBottom = "10px";
+		nameInput.addClass("vibe-writing-full-width");
+        nameInput.addClass("vibe-writing-mb-10");
 
 		// Description field
 		const descContainer = contentEl.createDiv();
@@ -231,54 +220,35 @@ export class EditSuggestionModal extends Modal {
 			type: "text",
 			value: this.option.description,
 		});
-		descInput.style.width = "100%";
-		descInput.style.marginBottom = "10px";
+		descInput.addClass("vibe-writing-full-width");
+        descInput.addClass("vibe-writing-mb-10");
 
 		// Prompt field
 		const promptContainer = contentEl.createDiv();
 		promptContainer.createEl("label", { text: translate('ui.prompt') });
-		// Around lines 241-248, remove debug logs:
 		const promptInput = promptContainer.createEl("textarea");
-		// Remove: console.log("Option prompt:", this.option.prompt);
-		// Set value after element creation
 		promptInput.value = this.option.prompt || "";
-		promptInput.style.width = "100%";
-		promptInput.style.height = "150px";
-		promptInput.style.marginBottom = "20px";
-		// Remove: console.log("Textarea value after setting:", promptInput.value);
-		// Remove: console.log("Textarea element:", promptInput);
+		promptInput.addClass("vibe-writing-full-width");
+        promptInput.addClass("vibe-writing-mb-20");
+		promptInput.addClass("prompt-textarea");
 
 		// Buttons
-		const buttonContainer = contentEl.createDiv();
-		buttonContainer.style.display = "flex";
-		buttonContainer.style.gap = "10px";
-		buttonContainer.style.justifyContent = "flex-end";
+        const buttonContainer = contentEl.createDiv();
+        buttonContainer.addClass("vibe-writing-button-row");
+        buttonContainer.addClass("vibe-writing-gap-10");
 
-		// Delete button with plain styling
+		// Delete button with plain styling (if available)
 		if (this.onDelete) {
 			const deleteButton = buttonContainer.createEl("button", {
 				text: translate('ui.delete'),
 			});
-			// Plain button styling
-			deleteButton.style.padding = "8px 16px";
-			deleteButton.style.fontSize = "14px";
-			deleteButton.style.backgroundColor = "transparent";
-			deleteButton.style.color = "var(--text-muted)";
-			deleteButton.style.border = "1px solid var(--background-modifier-border)";
-			deleteButton.style.borderRadius = "4px";
-			deleteButton.style.cursor = "pointer";
-			deleteButton.style.transition = "all 0.2s ease";
-			
-			// Hover effect for delete button
-			deleteButton.addEventListener('mouseenter', () => {
-				deleteButton.style.backgroundColor = "var(--background-modifier-hover)";
-				deleteButton.style.color = "var(--text-normal)";
-			});
-			deleteButton.addEventListener('mouseleave', () => {
-				deleteButton.style.backgroundColor = "transparent";
-				deleteButton.style.color = "var(--text-muted)";
-			});
-			
+			deleteButton.addClass("vibe-writing-btn");
+            deleteButton.addClass("vibe-writing-btn-plain");
+
+			// Remove JS hover styling; CSS will handle :hover
+			// deleteButton.addEventListener('mouseenter', () => {...});
+			// deleteButton.addEventListener('mouseleave', () => {...});
+
 			deleteButton.onclick = () => {
 				const confirmed = confirm(
 					translate('confirm.delete-suggestion', { name: this.option.name }),
@@ -290,29 +260,17 @@ export class EditSuggestionModal extends Modal {
 			};
 		}
 
-		// Save button with edit button styling (purple/accent)
+		// Save button with accent styling
 		const saveButton = buttonContainer.createEl("button", {
 			text: translate('ui.save'),
 		});
-		// Match the edit button styling from suggester
-		saveButton.style.padding = "8px 16px";
-		saveButton.style.fontSize = "14px";
-		saveButton.style.backgroundColor = "var(--interactive-accent)";
-		saveButton.style.color = "var(--text-on-accent)";
-		saveButton.style.border = "none";
-		saveButton.style.borderRadius = "4px";
-		saveButton.style.cursor = "pointer";
-		saveButton.style.fontWeight = "500";
-		saveButton.style.transition = "all 0.2s ease";
-		
-		// Hover effect for save button
-		saveButton.addEventListener('mouseenter', () => {
-			saveButton.style.opacity = "0.8";
-		});
-		saveButton.addEventListener('mouseleave', () => {
-			saveButton.style.opacity = "1";
-		});
-		
+		saveButton.addClass("vibe-writing-btn");
+        saveButton.addClass("vibe-writing-btn-primary");
+
+		// Remove JS hover styling; CSS will handle :hover
+		// saveButton.addEventListener('mouseenter', () => {...});
+		// saveButton.addEventListener('mouseleave', () => {...});
+
 		saveButton.onclick = async () => {
 			this.option.name = nameInput.value;
 			this.option.description = descInput.value;

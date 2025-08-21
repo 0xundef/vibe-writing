@@ -79,3 +79,81 @@
     cursor: not-allowed;
     background-color: var(--background-secondary);
 }
+
+/* New utility classes and components for no-inline-style compliance */
+
+/* Vibe Writing Plugin - Layout utilities */
+.vibe-writing-full-width { width: 100%; }
+.vibe-writing-mb-10 { margin-bottom: 10px; }
+.vibe-writing-mb-20 { margin-bottom: 20px; }
+.vibe-writing-button-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+.vibe-writing-gap-10 { gap: 10px; }
+
+/* Vibe Writing Plugin - AIPromptModal specifics */
+.ai-prompt-modal .vibe-writing-response-area {
+    height: 200px;
+    resize: vertical;
+}
+
+/* Vibe Writing Plugin - Buttons */
+.vibe-writing-btn {
+    padding: 8px 16px;
+    font-size: 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: none;
+    font-weight: 500;
+    transition: opacity 0.2s, background-color 0.2s, color 0.2s;
+}
+.vibe-writing-btn-primary {
+    background-color: var(--interactive-accent);
+    color: var(--text-on-accent);
+}
+.vibe-writing-btn-primary:hover {
+    opacity: 0.8;
+}
+.vibe-writing-btn-plain {
+    background-color: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
+}
+.vibe-writing-btn-plain:hover {
+    background-color: var(--background-modifier-hover);
+    color: var(--text-normal);
+}
+
+/* Vibe Writing Plugin - Suggester list item styles */
+.vibe-writing-suggestion-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+.vibe-writing-suggestion-info { flex: 1; }
+.vibe-writing-suggestion-edit-btn {
+    margin-left: 10px;
+    padding: 2px 8px;
+    font-size: 12px;
+    background-color: var(--interactive-accent);
+    color: var(--text-on-accent);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* Vibe Writing Plugin - Support section text styles */
+.vibe-writing-support-desc {
+    margin-bottom: 15px;
+    color: var(--text-muted);
+}
+.vibe-writing-thank-you-msg {
+    text-align: center;
+    margin-top: 10px;
+    color: var(--text-muted);
+    font-size: 0.9em;
+}
