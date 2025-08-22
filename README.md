@@ -4,9 +4,6 @@ A writing skills improvement assistant for Obsidian that helps you cultivate dai
 
 **This is not an AI proxy - it's your personal writing coach.**
 
-## Why Vibe Writing?
-
-If you want to improve your writing skills through daily practice, you need feedback that helps you grow, not AI that writes for you. Vibe Writing analyzes your text and provides targeted suggestions to enhance your writing abilities, helping you become a better writer over time in any language you choose to practice.
 
 ## Demo
 
