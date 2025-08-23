@@ -7023,7 +7023,9 @@ var AIPromptModal = class extends import_obsidian2.Modal {
         const quoteBlock = `
 
 > [!quote]+ AI Response
-> ${response.trim().replace(/\n/g, "\n> ")}
+> **Question:** ${prompt.trim().replace(/\n/g, "\n> ")}
+> 
+> **Answer:** ${response.trim().replace(/\n/g, "\n> ")}
 
 `;
         const cursor = this.editor.getCursor();
