@@ -45,7 +45,7 @@ export class ImprovementSuggester extends SuggestModal<ImprovementOption> {
 	}
 
 	renderSuggestion(option: ImprovementOption, el: HTMLElement) {
-		el.addClass("suggestion-item");
+		el.addClass("vibe-writing-suggestion-item");
 
 		// Create a container for the suggestion content
 		const contentContainer = el.createDiv({ cls: "vibe-writing-suggestion-content" });

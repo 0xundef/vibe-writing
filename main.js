@@ -6967,7 +6967,18 @@ var AIPromptModal = class extends import_obsidian2.SuggestModal {
     }
   }
   renderSuggestion(prompt, el) {
-    el.createEl("div", { text: prompt });
+    const container = el.createEl("div", { cls: "vibe-writing-suggestion-item" });
+    const textEl = container.createEl("div", { text: prompt });
+    const removeIcon = container.createEl("span", {
+      cls: "vibe-writing-suggestion-remove-icon"
+    });
+    (0, import_obsidian2.setIcon)(removeIcon, "circle-x");
+    removeIcon.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.plugin.removeFromPromptHistory(prompt);
+      this.inputEl.dispatchEvent(new Event("input", { bubbles: true }));
+    });
   }
   onChooseSuggestion(prompt, evt) {
     this.sendPrompt(prompt);
@@ -7179,7 +7190,7 @@ var ImprovementSuggester = class extends import_obsidian3.SuggestModal {
     );
   }
   renderSuggestion(option, el) {
-    el.addClass("suggestion-item");
+    el.addClass("vibe-writing-suggestion-item");
     const contentContainer = el.createDiv({ cls: "vibe-writing-suggestion-content" });
     const infoContainer = contentContainer.createDiv({
       cls: "vibe-writing-suggestion-info"
@@ -7719,6 +7730,16 @@ var AiAssistantPlugin = class extends import_obsidian6.Plugin {
     }
     history.sort((a, b) => b.usageCount - a.usageCount);
     this.saveSettings();
+  }
+  removeFromPromptHistory(prompt) {
+    const trimmedPrompt = prompt.trim();
+    if (!trimmedPrompt) return;
+    const history = this.settings.promptHistory;
+    const index = history.findIndex((item) => item.text === trimmedPrompt);
+    if (index !== -1) {
+      history.splice(index, 1);
+      this.saveSettings();
+    }
   }
   getDefaultSuggestions() {
     return [

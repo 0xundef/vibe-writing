@@ -366,6 +366,19 @@ export default class AiAssistantPlugin extends Plugin {
 		this.saveSettings();
 	}
 
+	removeFromPromptHistory(prompt: string) {
+		const trimmedPrompt = prompt.trim();
+		if (!trimmedPrompt) return;
+
+		const history = this.settings.promptHistory;
+		const index = history.findIndex(item => item.text === trimmedPrompt);
+
+		if (index !== -1) {
+			history.splice(index, 1);
+			this.saveSettings();
+		}
+	}
+
 	getDefaultSuggestions(): ImprovementOption[] {
 		return [
 			{

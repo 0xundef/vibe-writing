@@ -1,4 +1,4 @@
-import { App, Modal, Notice, SuggestModal } from "obsidian";
+import { App, Modal, Notice, SuggestModal, setIcon } from "obsidian";
 import type AiAssistantPlugin from "./main";
 import { ImprovementOption, PromptHistoryItem } from "./types";
 import { translate } from "./i18n/language-manager";
@@ -32,7 +32,20 @@ export class AIPromptModal extends SuggestModal<string> {
 	}
 
 	renderSuggestion(prompt: string, el: HTMLElement) {
-		el.createEl("div", { text: prompt });
+		const container = el.createEl("div", { cls: "vibe-writing-suggestion-item" });
+		const textEl = container.createEl("div", { text: prompt });
+		const removeIcon = container.createEl("span", { 
+			cls: "vibe-writing-suggestion-remove-icon"
+		});
+		setIcon(removeIcon, "circle-x");
+
+		removeIcon.addEventListener("click", (e) => {
+			e.preventDefault();
+			e.stopPropagation();
+			this.plugin.removeFromPromptHistory(prompt);
+			// Refresh suggestions
+			this.inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+		});
 	}
 
 	onChooseSuggestion(prompt: string, evt: MouseEvent | KeyboardEvent) {
