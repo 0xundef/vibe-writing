@@ -6981,7 +6981,17 @@ var AIPromptModal = class extends import_obsidian2.SuggestModal {
     });
   }
   onChooseSuggestion(prompt, evt) {
-    this.sendPrompt(prompt);
+    let finalPrompt = prompt;
+    if (this.editor && this.editor.getSelection) {
+      const selectedText = this.editor.getSelection();
+      if (selectedText && selectedText.trim()) {
+        finalPrompt = `${prompt}
+
+Context:
+${selectedText}`;
+      }
+    }
+    this.sendPrompt(finalPrompt);
   }
   onNoSuggestion() {
   }

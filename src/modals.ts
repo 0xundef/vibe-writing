@@ -49,7 +49,16 @@ export class AIPromptModal extends SuggestModal<string> {
 	}
 
 	onChooseSuggestion(prompt: string, evt: MouseEvent | KeyboardEvent) {
-		this.sendPrompt(prompt);
+		// Check if there is pre-selected text in the editor
+		let finalPrompt = prompt;
+		if (this.editor && this.editor.getSelection) {
+			const selectedText = this.editor.getSelection();
+			if (selectedText && selectedText.trim()) {
+				// Use the selected text as context for the prompt
+				finalPrompt = `${prompt}\n\nContext:\n${selectedText}`;
+			}
+		}
+		this.sendPrompt(finalPrompt);
 	}
 
 	onNoSuggestion() {
