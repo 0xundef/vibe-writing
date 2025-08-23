@@ -6949,6 +6949,105 @@ function initializeLanguage(language) {
 }
 
 // src/modals.ts
+var AIPromptModal = class extends import_obsidian2.Modal {
+  constructor(app, plugin, editor) {
+    super(app);
+    this.plugin = plugin;
+    this.editor = editor;
+  }
+  onOpen() {
+    const { contentEl } = this;
+    contentEl.empty();
+    contentEl.addClass("vibe-writing-ai-prompt-modal");
+    const title = contentEl.createEl("h2", {
+      text: translate("command.one-shot-chat")
+    });
+    title.addClass("vibe-writing-mb-10");
+    const promptContainer = contentEl.createDiv();
+    this.promptInput = promptContainer.createEl("input", {
+      type: "text",
+      placeholder: translate("placeholder.prompt-input")
+    });
+    this.promptInput.addClass("vibe-writing-full-width");
+    this.promptInput.addClass("vibe-writing-mb-10");
+    const buttonContainer = contentEl.createDiv();
+    buttonContainer.addClass("vibe-writing-button-row");
+    const sendButton = buttonContainer.createEl("button", {
+      text: "Send"
+    });
+    sendButton.addClass("vibe-writing-btn");
+    sendButton.addClass("vibe-writing-btn-primary");
+    sendButton.addEventListener("click", () => {
+      this.sendPrompt();
+    });
+    setTimeout(() => {
+      this.promptInput.focus();
+    }, 100);
+    this.promptInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        this.sendPrompt();
+      }
+      if (e.key === "Escape") {
+        e.preventDefault();
+        this.close();
+      }
+    });
+  }
+  async sendPrompt() {
+    const prompt = this.promptInput.value.trim();
+    if (!prompt) {
+      new import_obsidian2.Notice("Please enter a prompt.");
+      return;
+    }
+    this.promptInput.disabled = true;
+    this.promptInput.placeholder = translate(
+      "placeholder.generating-response"
+    );
+    try {
+      this.plugin.build_api();
+      if (!this.plugin.aiAssistant) {
+        new import_obsidian2.Notice("Please configure your API settings first.");
+        return;
+      }
+      const messages = [
+        {
+          role: "user",
+          content: prompt
+        }
+      ];
+      const response = await this.plugin.aiAssistant.text_api_call(messages);
+      if (response && this.editor) {
+        const codeBlock = `
+
+\`\`\`
+${response.trim()}
+\`\`\`
+
+`;
+        const cursor = this.editor.getCursor();
+        this.editor.replaceRange(codeBlock, cursor, cursor);
+        new import_obsidian2.Notice("AI response inserted at cursor position.");
+        this.close();
+      } else {
+        new import_obsidian2.Notice("No response from AI. Please try again.");
+      }
+    } catch (error) {
+      console.error("AI API Error:", error);
+      new import_obsidian2.Notice(`Error: ${error.message || "Failed to get AI response"}.`);
+    } finally {
+      this.promptInput.disabled = false;
+      this.promptInput.placeholder = translate(
+        "placeholder.prompt-input"
+      );
+      this.promptInput.value = "";
+    }
+  }
+  onClose() {
+    const { contentEl } = this;
+    contentEl.empty();
+  }
+};
 var EditSuggestionModal = class extends import_obsidian2.Modal {
   constructor(app, plugin, option, onSave, onDelete, title = "Edit Prompt") {
     super(app);
@@ -7164,6 +7263,11 @@ var ImprovementSuggester = class extends import_obsidian3.SuggestModal {
       );
       return;
     }
+    if (!this.plugin.aiAssistant) {
+      new import_obsidian3.Notice("Please configure your API key in settings before using AI features.");
+      this.plugin.updateStatusBar("Ready");
+      return;
+    }
     try {
       this.plugin.updateStatusBar("Processing...");
       const timeoutMs = 3e4;
@@ -7362,33 +7466,48 @@ var AiAssistantSettingTab = class extends import_obsidian5.PluginSettingTab {
 var AiAssistantPlugin = class extends import_obsidian6.Plugin {
   constructor() {
     super(...arguments);
+    // Update the type declaration at the top of the class
+    this.aiAssistant = null;
     this.lastSelection = null;
     this.lastAiResponse = null;
     this.lastQuoteBlockRange = null;
     this.statusBarItem = null;
   }
   build_api() {
+    let hasValidKey = false;
     if (this.settings.modelName.includes("claude")) {
-      this.aiAssistant = new AnthropicAssistant(
-        this.settings.openAIapiKey,
-        this.settings.anthropicApiKey,
-        this.settings.modelName,
-        this.settings.maxTokens
-      );
+      hasValidKey = !!(this.settings.anthropicApiKey && this.settings.anthropicApiKey.trim() !== "");
+      if (hasValidKey) {
+        this.aiAssistant = new AnthropicAssistant(
+          this.settings.openAIapiKey,
+          this.settings.anthropicApiKey,
+          this.settings.modelName,
+          this.settings.maxTokens
+        );
+      }
     } else if (this.settings.modelName.includes("qwen")) {
-      this.aiAssistant = new QwenAssistant(
-        this.settings.openAIapiKey,
-        this.settings.qwenApiKey,
-        this.settings.modelName,
-        this.settings.maxTokens,
-        this.settings.qwenBaseURL
-      );
+      hasValidKey = !!(this.settings.qwenApiKey && this.settings.qwenApiKey.trim() !== "");
+      if (hasValidKey) {
+        this.aiAssistant = new QwenAssistant(
+          this.settings.openAIapiKey,
+          this.settings.qwenApiKey,
+          this.settings.modelName,
+          this.settings.maxTokens,
+          this.settings.qwenBaseURL
+        );
+      }
     } else {
-      this.aiAssistant = new OpenAIAssistant(
-        this.settings.openAIapiKey,
-        this.settings.modelName,
-        this.settings.maxTokens
-      );
+      hasValidKey = !!(this.settings.openAIapiKey && this.settings.openAIapiKey.trim() !== "");
+      if (hasValidKey) {
+        this.aiAssistant = new OpenAIAssistant(
+          this.settings.openAIapiKey,
+          this.settings.modelName,
+          this.settings.maxTokens
+        );
+      }
+    }
+    if (!hasValidKey) {
+      this.aiAssistant = null;
     }
   }
   async onload() {
@@ -7455,6 +7574,23 @@ var AiAssistantPlugin = class extends import_obsidian6.Plugin {
         }
       });
       this.addCommand({
+        id: "one-shot-chat",
+        name: translate("command.one-shot-chat"),
+        callback: async () => {
+          const activeView = this.app.workspace.getActiveViewOfType(import_obsidian6.MarkdownView);
+          if (!activeView || !activeView.editor) {
+            new import_obsidian6.Notice("No active markdown view found.");
+            return;
+          }
+          const aiModal = new AIPromptModal(
+            this.app,
+            this,
+            activeView.editor
+          );
+          aiModal.open();
+        }
+      });
+      this.addCommand({
         id: "replace-with-ai",
         name: translate("command.replace-ai-response"),
         callback: async () => {
@@ -7499,9 +7635,6 @@ var AiAssistantPlugin = class extends import_obsidian6.Plugin {
         this.captureSelection();
       });
       this.addSettingTab(new AiAssistantSettingTab(this.app, this));
-      console.log(
-        "\u{1F389} AI Assistant Plugin: Successfully loaded with all commands and settings!"
-      );
     } catch (error) {
       console.error("\u274C AI Assistant Plugin: Failed to load", error);
       throw error;
@@ -7669,14 +7802,8 @@ var AiAssistantPlugin = class extends import_obsidian6.Plugin {
                 );
                 const savedBytes = originalSize - compressedSize;
                 const savedPercentage = (savedBytes / originalSize * 100).toFixed(1);
-                console.log(
-                  `Compressed ${file.name} -> ${newFileName}: ${this.formatBytes(savedBytes)} saved (${savedPercentage}%)`
-                );
                 resolve(newFilePath);
               } else {
-                console.log(
-                  `Skipped ${file.name}: no size reduction achieved`
-                );
                 resolve(null);
               }
             },

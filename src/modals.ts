@@ -5,24 +5,29 @@ import { translate } from "./i18n/language-manager";
 
 export class AIPromptModal extends Modal {
 	plugin: AiAssistantPlugin;
-	selectedText: string;
+	editor: any;
 	promptInput: HTMLInputElement;
-	responseArea: HTMLTextAreaElement;
 
 	constructor(
 		app: App,
 		plugin: AiAssistantPlugin,
-		selectedText: string = "",
+		editor: any,
 	) {
 		super(app);
 		this.plugin = plugin;
-		this.selectedText = selectedText;
+		this.editor = editor;
 	}
 
 	onOpen() {
 		const { contentEl } = this;
 		contentEl.empty();
 		contentEl.addClass("vibe-writing-ai-prompt-modal");
+
+		// Title
+		const title = contentEl.createEl("h2", {
+			text: translate("command.one-shot-chat"),
+		});
+		title.addClass("vibe-writing-mb-10");
 
 		// Prompt field
 		const promptContainer = contentEl.createDiv();
@@ -34,31 +39,20 @@ export class AIPromptModal extends Modal {
 		this.promptInput.addClass("vibe-writing-full-width");
 		this.promptInput.addClass("vibe-writing-mb-10");
 
-		// Response field
-		const responseContainer = contentEl.createDiv();
-		this.responseArea = responseContainer.createEl("textarea");
-		// Apply classes instead of inline styles
-		this.responseArea.addClass("vibe-writing-full-width");
-		this.responseArea.addClass("vibe-writing-response-area");
-		this.responseArea.addClass("vibe-writing-mb-10");
-		this.responseArea.placeholder = translate("placeholder.ai-response");
-		this.responseArea.readOnly = true;
-
-		// Button container for better layout
+		// Button container
 		const buttonContainer = contentEl.createDiv();
 		buttonContainer.addClass("vibe-writing-button-row");
 
-		// Copy button
-		const copyButton = buttonContainer.createEl("button", {
-			text: translate("ui.copy"),
+		// Send button
+		const sendButton = buttonContainer.createEl("button", {
+			text: "Send",
 		});
-		// Use class-based styling
-		copyButton.addClass("vibe-writing-btn");
-		copyButton.addClass("vibe-writing-btn-primary");
+		sendButton.addClass("vibe-writing-btn");
+		sendButton.addClass("vibe-writing-btn-primary");
 
-		// Copy button click handler
-		copyButton.addEventListener("click", () => {
-			this.copyResponse();
+		// Send button click handler
+		sendButton.addEventListener("click", () => {
+			this.sendPrompt();
 		});
 
 		// Focus the input
@@ -82,7 +76,7 @@ export class AIPromptModal extends Modal {
 	async sendPrompt() {
 		const prompt = this.promptInput.value.trim();
 		if (!prompt) {
-			new Notice(translate("notice.enter-prompt"));
+			new Notice("Please enter a prompt.");
 			return;
 		}
 
@@ -92,14 +86,9 @@ export class AIPromptModal extends Modal {
 		);
 
 		try {
-			let fullPrompt = prompt;
-			if (this.selectedText) {
-				fullPrompt = `${prompt}\n\nSelected text:\n${this.selectedText}`;
-			}
-
 			this.plugin.build_api();
 			if (!this.plugin.aiAssistant) {
-				new Notice(translate("notice.api-not-configured"));
+				new Notice("Please configure your API settings first.");
 				return;
 			}
 
@@ -107,23 +96,26 @@ export class AIPromptModal extends Modal {
 			const messages = [
 				{
 					role: "user",
-					content: fullPrompt,
+					content: prompt,
 				},
 			];
 
-			const response =
-				await this.plugin.aiAssistant.text_api_call(messages);
+			const response = await this.plugin.aiAssistant.text_api_call(messages);
 
-			if (response) {
-				this.displayResponse(response);
+			if (response && this.editor) {
+				// Insert AI response at cursor position wrapped in code block
+				const codeBlock = `\n\n\`\`\`\n${response.trim()}\n\`\`\`\n\n`;
+				const cursor = this.editor.getCursor();
+				this.editor.replaceRange(codeBlock, cursor, cursor);
+				
+				new Notice("AI response inserted at cursor position.");
+				this.close();
 			} else {
-				this.displayResponse(translate("message.no-response"));
+				new Notice("No response from AI. Please try again.");
 			}
 		} catch (error) {
 			console.error("AI API Error:", error);
-			this.displayResponse(
-				`${translate("error.prefix")}: ${error.message || translate("error.failed-ai-response")}`,
-			);
+			new Notice(`Error: ${error.message || "Failed to get AI response"}.`);
 		} finally {
 			// Re-enable input
 			this.promptInput.disabled = false;
@@ -133,35 +125,6 @@ export class AIPromptModal extends Modal {
 			// Clear input for next prompt
 			this.promptInput.value = "";
 		}
-	}
-
-	copyResponse() {
-		const responseText = this.responseArea.value.trim();
-		if (!responseText) {
-			new Notice(translate("placeholder.ai-response"));
-			return;
-		}
-
-		// Normalize text to ensure proper line breaks and remove any formatting artifacts
-		const normalizedText = responseText
-			.replace(/\r\n/g, '\n') // Convert Windows line endings
-			.replace(/\r/g, '\n')   // Convert Mac line endings
-			.replace(/\n{3,}/g, '\n\n'); // Limit consecutive line breaks to max 2
-
-		// Copy to clipboard
-		navigator.clipboard
-			.writeText(normalizedText)
-			.then(() => {
-				new Notice(translate("notice.copied-to-clipboard"));
-			})
-			.catch((err) => {
-				console.error("Failed to copy text: ", err);
-				new Notice(translate("notice.copy-failed"));
-			});
-	}
-
-	displayResponse(response: string) {
-		this.responseArea.value = response;
 	}
 
 	onClose() {

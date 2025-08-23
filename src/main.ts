@@ -61,7 +61,6 @@ export default class AiAssistantPlugin extends Plugin {
 		}
 		
 		if (!hasValidKey) {
-			console.log("AI Assistant: No API key provided. Please configure your API key in settings.");
 			this.aiAssistant = null;
 		}
 	}
@@ -151,33 +150,25 @@ export default class AiAssistantPlugin extends Plugin {
 				},
 			});
 
-			// Add command to open edit modal
-			/*
+			// Add command for simplified one-shot chat
 			this.addCommand({
 				id: "one-shot-chat",
 				name: translate("command.one-shot-chat"),
 				callback: async () => {
-					const activeView =
-						this.app.workspace.getActiveViewOfType(MarkdownView);
-					let initialContent = "";
-			
-					// If there's a text selection, use it as initial content
-					if (activeView && activeView.editor) {
-						const selection = activeView.editor.getSelection();
-						if (selection) {
-							initialContent = selection;
-						}
+					const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
+					if (!activeView || !activeView.editor) {
+						new Notice("No active markdown view found.");
+						return;
 					}
 			
 					const aiModal = new AIPromptModal(
 						this.app,
 						this,
-						initialContent,
+						activeView.editor,
 					);
 					aiModal.open();
 				},
 			});
-			*/
 			
 			// Add command to replace original text with last AI response
 			this.addCommand({
@@ -251,9 +242,7 @@ export default class AiAssistantPlugin extends Plugin {
 
 			this.addSettingTab(new AiAssistantSettingTab(this.app, this));
 
-			console.log(
-				"🎉 AI Assistant Plugin: Successfully loaded with all commands and settings!",
-			);
+
 		} catch (error) {
 			console.error("❌ AI Assistant Plugin: Failed to load", error);
 			throw error;
@@ -474,14 +463,10 @@ export default class AiAssistantPlugin extends Plugin {
 									(savedBytes / originalSize) *
 									100
 								).toFixed(1);
-								console.log(
-									`Compressed ${file.name} -> ${newFileName}: ${this.formatBytes(savedBytes)} saved (${savedPercentage}%)`,
-								);
+								
 								resolve(newFilePath);
 							} else {
-								console.log(
-									`Skipped ${file.name}: no size reduction achieved`,
-								);
+								
 								resolve(null);
 							}
 						},
