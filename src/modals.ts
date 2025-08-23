@@ -103,10 +103,10 @@ export class AIPromptModal extends Modal {
 			const response = await this.plugin.aiAssistant.text_api_call(messages);
 
 			if (response && this.editor) {
-				// Insert AI response at cursor position wrapped in code block
-				const codeBlock = `\n\n\`\`\`\n${response.trim()}\n\`\`\`\n\n`;
+				// Insert AI response at cursor position wrapped in quote block
+				const quoteBlock = `\n\n> [!quote]+ AI Response\n> ${response.trim().replace(/\n/g, "\n> ")}\n\n`;
 				const cursor = this.editor.getCursor();
-				this.editor.replaceRange(codeBlock, cursor, cursor);
+				this.editor.replaceRange(quoteBlock, cursor, cursor);
 				
 				new Notice("AI response inserted at cursor position.");
 				this.close();
