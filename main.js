@@ -7686,6 +7686,14 @@ var AiAssistantPlugin = class extends import_obsidian6.Plugin {
           new import_obsidian6.Notice("Text replaced with AI response!");
         }
       });
+      this.addCommand({
+        id: "split-right-with-note",
+        name: "Split right and open specified note",
+        callback: async () => {
+          const modal = new FileSuggesterModal(this.app, this);
+          modal.open();
+        }
+      });
       this.registerDomEvent(document, "selectionchange", () => {
         this.captureSelection();
       });
@@ -7924,5 +7932,38 @@ var AiAssistantPlugin = class extends import_obsidian6.Plugin {
     const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  }
+  splitRightAndOpenNote(file) {
+    var _a2;
+    const workspace = this.app.workspace;
+    const activeLeaf = (_a2 = workspace.getActiveViewOfType(import_obsidian6.MarkdownView)) == null ? void 0 : _a2.leaf;
+    if (activeLeaf) {
+      const newLeaf = workspace.createLeafBySplit(activeLeaf, "vertical");
+      if (newLeaf) {
+        newLeaf.openFile(file);
+      }
+    } else {
+      workspace.getLeaf("split", "vertical").openFile(file);
+    }
+  }
+};
+var FileSuggesterModal = class extends import_obsidian6.SuggestModal {
+  constructor(app, plugin) {
+    super(app);
+    this.plugin = plugin;
+    this.setPlaceholder("Type to search for a note...");
+  }
+  getSuggestions(query) {
+    const files = this.app.vault.getMarkdownFiles();
+    return files.filter(
+      (file) => file.basename.toLowerCase().includes(query.toLowerCase())
+    ).slice(0, 10);
+  }
+  renderSuggestion(file, el) {
+    el.createEl("div", { text: file.basename });
+    el.createEl("small", { text: file.path, cls: "suggestion-note" });
+  }
+  onChooseSuggestion(file) {
+    this.plugin.splitRightAndOpenNote(file);
   }
 };

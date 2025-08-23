@@ -1,4 +1,4 @@
-import { MarkdownView, Notice, Plugin, TFile } from "obsidian";
+import { MarkdownView, Notice, Plugin, TFile, SuggestModal } from "obsidian";
 import {
 	AnthropicAssistant,
 	OpenAIAssistant,
@@ -282,6 +282,16 @@ export default class AiAssistantPlugin extends Plugin {
 					);
 
 					new Notice("Text replaced with AI response!");
+				},
+			});
+
+			// Add command to split right and open specified note
+			this.addCommand({
+				id: "split-right-with-note",
+				name: "Split right and open specified note",
+				callback: async () => {
+					const modal = new FileSuggesterModal(this.app, this);
+					modal.open();
 				},
 			});
 
@@ -606,5 +616,48 @@ export default class AiAssistantPlugin extends Plugin {
 		const sizes = ["Bytes", "KB", "MB", "GB"];
 		const i = Math.floor(Math.log(bytes) / Math.log(k));
 		return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+	}
+
+	splitRightAndOpenNote(file: TFile) {
+		const workspace = this.app.workspace;
+		const activeLeaf = workspace.getActiveViewOfType(MarkdownView)?.leaf;
+		
+		if (activeLeaf) {
+			// Split right from the active leaf
+			const newLeaf = workspace.createLeafBySplit(activeLeaf, 'vertical');
+			// Open the specified file in the new leaf
+			if (newLeaf) {
+				newLeaf.openFile(file);
+			}
+		} else {
+			// Fallback: just open the file in a new leaf
+			workspace.getLeaf('split', 'vertical').openFile(file);
+		}
+	}
+}
+
+class FileSuggesterModal extends SuggestModal<TFile> {
+	plugin: AiAssistantPlugin;
+
+	constructor(app: any, plugin: AiAssistantPlugin) {
+		super(app);
+		this.plugin = plugin;
+		this.setPlaceholder("Type to search for a note...");
+	}
+
+	getSuggestions(query: string): TFile[] {
+		const files = this.app.vault.getMarkdownFiles();
+		return files.filter((file: TFile) => 
+			file.basename.toLowerCase().includes(query.toLowerCase())
+		).slice(0, 10);
+	}
+
+	renderSuggestion(file: TFile, el: HTMLElement): void {
+		el.createEl("div", { text: file.basename });
+		el.createEl("small", { text: file.path, cls: "suggestion-note" });
+	}
+
+	onChooseSuggestion(file: TFile): void {
+		this.plugin.splitRightAndOpenNote(file);
 	}
 }
