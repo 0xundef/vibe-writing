@@ -39,21 +39,7 @@ export class AIPromptModal extends Modal {
 		this.promptInput.addClass("vibe-writing-full-width");
 		this.promptInput.addClass("vibe-writing-mb-10");
 
-		// Button container
-		const buttonContainer = contentEl.createDiv();
-		buttonContainer.addClass("vibe-writing-button-row");
 
-		// Send button
-		const sendButton = buttonContainer.createEl("button", {
-			text: "Send",
-		});
-		sendButton.addClass("vibe-writing-btn");
-		sendButton.addClass("vibe-writing-btn-primary");
-
-		// Send button click handler
-		sendButton.addEventListener("click", () => {
-			this.sendPrompt();
-		});
 
 		// Focus the input
 		setTimeout(() => {

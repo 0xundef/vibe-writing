@@ -6972,16 +6972,6 @@ var AIPromptModal = class extends import_obsidian2.Modal {
     });
     this.promptInput.addClass("vibe-writing-full-width");
     this.promptInput.addClass("vibe-writing-mb-10");
-    const buttonContainer = contentEl.createDiv();
-    buttonContainer.addClass("vibe-writing-button-row");
-    const sendButton = buttonContainer.createEl("button", {
-      text: "Send"
-    });
-    sendButton.addClass("vibe-writing-btn");
-    sendButton.addClass("vibe-writing-btn-primary");
-    sendButton.addEventListener("click", () => {
-      this.sendPrompt();
-    });
     setTimeout(() => {
       this.promptInput.focus();
     }, 100);
@@ -7022,10 +7012,10 @@ var AIPromptModal = class extends import_obsidian2.Modal {
       if (response && this.editor) {
         const quoteBlock = `
 
-> [!quote]+ AI Response
-> **Question:** ${prompt.trim().replace(/\n/g, "\n> ")}
+> [!quote]+ AI Response(shot chat)
+> **Q:** ${prompt.trim().replace(/\n/g, "\n> ")}
 > 
-> **Answer:** ${response.trim().replace(/\n/g, "\n> ")}
+> **A:** ${response.trim().replace(/\n/g, "\n> ")}
 
 `;
         const cursor = this.editor.getCursor();
