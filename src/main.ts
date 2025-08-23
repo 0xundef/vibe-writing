@@ -16,7 +16,8 @@ import { translate, initializeLanguage } from "./i18n/language-manager";
 
 export default class AiAssistantPlugin extends Plugin {
 	settings: AiAssistantSettings;
-	aiAssistant: OpenAIAssistant;
+	// Update the type declaration at the top of the class
+	aiAssistant: OpenAIAssistant | null = null;
 	lastSelection: { text: string; from: any; to: any; editor: any } | null =
 		null;
 	lastAiResponse: string | null = null;
@@ -24,27 +25,44 @@ export default class AiAssistantPlugin extends Plugin {
 	statusBarItem: HTMLElement | null = null;
 
 	build_api() {
+		// Check if we have the necessary API key before building
+		let hasValidKey = false;
+		
 		if (this.settings.modelName.includes("claude")) {
-			this.aiAssistant = new AnthropicAssistant(
-				this.settings.openAIapiKey,
-				this.settings.anthropicApiKey,
-				this.settings.modelName,
-				this.settings.maxTokens,
-			);
+			hasValidKey = !!(this.settings.anthropicApiKey && this.settings.anthropicApiKey.trim() !== "");
+			if (hasValidKey) {
+				this.aiAssistant = new AnthropicAssistant(
+					this.settings.openAIapiKey,
+					this.settings.anthropicApiKey,
+					this.settings.modelName,
+					this.settings.maxTokens,
+				);
+			}
 		} else if (this.settings.modelName.includes("qwen")) {
-			this.aiAssistant = new QwenAssistant(
-				this.settings.openAIapiKey,
-				this.settings.qwenApiKey,
-				this.settings.modelName,
-				this.settings.maxTokens,
-				this.settings.qwenBaseURL,
-			);
+			hasValidKey = !!(this.settings.qwenApiKey && this.settings.qwenApiKey.trim() !== "");
+			if (hasValidKey) {
+				this.aiAssistant = new QwenAssistant(
+					this.settings.openAIapiKey,
+					this.settings.qwenApiKey,
+					this.settings.modelName,
+					this.settings.maxTokens,
+					this.settings.qwenBaseURL,
+				);
+			}
 		} else {
-			this.aiAssistant = new OpenAIAssistant(
-				this.settings.openAIapiKey,
-				this.settings.modelName,
-				this.settings.maxTokens,
-			);
+			hasValidKey = !!(this.settings.openAIapiKey && this.settings.openAIapiKey.trim() !== "");
+			if (hasValidKey) {
+				this.aiAssistant = new OpenAIAssistant(
+					this.settings.openAIapiKey,
+					this.settings.modelName,
+					this.settings.maxTokens,
+				);
+			}
+		}
+		
+		if (!hasValidKey) {
+			console.log("AI Assistant: No API key provided. Please configure your API key in settings.");
+			this.aiAssistant = null;
 		}
 	}
 

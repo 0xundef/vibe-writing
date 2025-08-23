@@ -151,6 +151,13 @@ export class ImprovementSuggester extends SuggestModal<ImprovementOption> {
 			return;
 		}
 
+		// Check if API is configured BEFORE making any API calls
+		if (!this.plugin.aiAssistant) {
+			new Notice("Please configure your API key in settings before using AI features.");
+			this.plugin.updateStatusBar("Ready");
+			return;
+		}
+
 		try {
 			this.plugin.updateStatusBar("Processing...");
 
