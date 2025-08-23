@@ -6991,7 +6991,7 @@ Context:
 ${selectedText}`;
       }
     }
-    this.sendPrompt(finalPrompt);
+    this.sendPrompt(finalPrompt, prompt);
   }
   onNoSuggestion() {
   }
@@ -7018,7 +7018,7 @@ ${selectedText}`;
       { command: "esc", purpose: "Close" }
     ]);
   }
-  async sendPrompt(customPrompt) {
+  async sendPrompt(customPrompt, originalPrompt) {
     const prompt = customPrompt || this.inputEl.value.trim();
     if (!prompt) {
       new import_obsidian2.Notice("Please enter a prompt.");
@@ -7032,7 +7032,8 @@ ${selectedText}`;
         new import_obsidian2.Notice("Please configure your API settings first.");
         return;
       }
-      this.plugin.addToPromptHistory(prompt);
+      const promptForHistory = originalPrompt || prompt;
+      this.plugin.addToPromptHistory(promptForHistory);
       const messages = [
         {
           role: "user",

@@ -58,7 +58,8 @@ export class AIPromptModal extends SuggestModal<string> {
 				finalPrompt = `${prompt}\n\nContext:\n${selectedText}`;
 			}
 		}
-		this.sendPrompt(finalPrompt);
+		// Pass both the original prompt (for history) and final prompt (for API)
+		this.sendPrompt(finalPrompt, prompt);
 	}
 
 	onNoSuggestion() {
@@ -93,7 +94,7 @@ export class AIPromptModal extends SuggestModal<string> {
 		]);
 	}
 
-	async sendPrompt(customPrompt?: string) {
+	async sendPrompt(customPrompt?: string, originalPrompt?: string) {
 		const prompt = customPrompt || this.inputEl.value.trim();
 		if (!prompt) {
 			new Notice("Please enter a prompt.");
@@ -110,8 +111,9 @@ export class AIPromptModal extends SuggestModal<string> {
 				return;
 			}
 
-			// Add prompt to history
-			this.plugin.addToPromptHistory(prompt);
+			// Add prompt to history - use original prompt if provided, otherwise use the full prompt
+			const promptForHistory = originalPrompt || prompt;
+			this.plugin.addToPromptHistory(promptForHistory);
 
 			// Make the API call
 			const messages = [
