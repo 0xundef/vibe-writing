@@ -4,6 +4,12 @@ import {
 	DEFAULT_MAX_TOKENS,
 } from "./settings";
 
+export interface PromptHistoryItem {
+	text: string;
+	usageCount: number;
+	lastUsed: number;
+}
+
 export interface AiAssistantSettings {
 	mySetting: string;
 	openAIapiKey: string;
@@ -20,6 +26,7 @@ export interface AiAssistantSettings {
 	imageCompressionQuality: number;
 	imageMaxWidth: number;
 	imageMaxHeight: number;
+	promptHistory: PromptHistoryItem[];
 }
 
 export const DEFAULT_SETTINGS: AiAssistantSettings = {
@@ -38,6 +45,7 @@ export const DEFAULT_SETTINGS: AiAssistantSettings = {
 	imageCompressionQuality: 0.8,
 	imageMaxWidth: 1920,
 	imageMaxHeight: 1080,
+	promptHistory: [],
 };
 
 export interface ImprovementOption {

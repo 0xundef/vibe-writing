@@ -339,6 +339,33 @@ export default class AiAssistantPlugin extends Plugin {
 		await this.saveData(this.settings);
 	}
 
+	addToPromptHistory(prompt: string) {
+		const trimmedPrompt = prompt.trim();
+		if (!trimmedPrompt) return;
+
+		const history = this.settings.promptHistory;
+		const existingIndex = history.findIndex(item => item.text === trimmedPrompt);
+
+		if (existingIndex !== -1) {
+			// Update existing prompt
+			history[existingIndex].usageCount++;
+			history[existingIndex].lastUsed = Date.now();
+		} else {
+			// Add new prompt
+			history.push({
+				text: trimmedPrompt,
+				usageCount: 1,
+				lastUsed: Date.now()
+			});
+		}
+
+		// Sort by usage count (most used first)
+		history.sort((a, b) => b.usageCount - a.usageCount);
+
+		// Save settings
+		this.saveSettings();
+	}
+
 	getDefaultSuggestions(): ImprovementOption[] {
 		return [
 			{

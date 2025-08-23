@@ -1,12 +1,11 @@
-import { App, Modal, Notice } from "obsidian";
+import { App, Modal, Notice, SuggestModal } from "obsidian";
 import type AiAssistantPlugin from "./main";
-import { ImprovementOption } from "./types";
+import { ImprovementOption, PromptHistoryItem } from "./types";
 import { translate } from "./i18n/language-manager";
 
-export class AIPromptModal extends Modal {
+export class AIPromptModal extends SuggestModal<string> {
 	plugin: AiAssistantPlugin;
 	editor: any;
-	promptInput: HTMLInputElement;
 
 	constructor(
 		app: App,
@@ -18,58 +17,69 @@ export class AIPromptModal extends Modal {
 		this.editor = editor;
 	}
 
-	onOpen() {
-		const { contentEl } = this;
-		contentEl.empty();
-		contentEl.addClass("vibe-writing-ai-prompt-modal");
-
-		// Title
-		const title = contentEl.createEl("h2", {
-			text: translate("command.one-shot-chat"),
-		});
-		title.addClass("vibe-writing-mb-10");
-
-		// Prompt field
-		const promptContainer = contentEl.createDiv();
-		this.promptInput = promptContainer.createEl("input", {
-			type: "text",
-			placeholder: translate("placeholder.prompt-input"),
-		});
-		// Apply classes instead of inline styles
-		this.promptInput.addClass("vibe-writing-full-width");
-		this.promptInput.addClass("vibe-writing-mb-10");
-
-
-
-		// Focus the input
-		setTimeout(() => {
-			this.promptInput.focus();
-		}, 100);
-
-		// Handle keyboard shortcuts
-		this.promptInput.addEventListener("keydown", (e) => {
-			if (e.key === "Enter") {
-				e.preventDefault();
-				this.sendPrompt();
-			}
-			if (e.key === "Escape") {
-				e.preventDefault();
-				this.close();
-			}
-		});
+	getSuggestions(query: string): string[] {
+		const history = this.plugin.settings.promptHistory;
+		
+		if (query.length === 0) {
+			// Show all history when no query
+			return history.map((item: PromptHistoryItem) => item.text);
+		} else {
+			// Filter history based on query
+			return history
+				.filter((item: PromptHistoryItem) => item.text.toLowerCase().includes(query.toLowerCase()))
+				.map((item: PromptHistoryItem) => item.text);
+		}
 	}
 
-	async sendPrompt() {
-		const prompt = this.promptInput.value.trim();
+	renderSuggestion(prompt: string, el: HTMLElement) {
+		el.createEl("div", { text: prompt });
+	}
+
+	onChooseSuggestion(prompt: string, evt: MouseEvent | KeyboardEvent) {
+		this.sendPrompt(prompt);
+	}
+
+	onNoSuggestion() {
+		// Do nothing - let the user continue typing or press Enter
+	}
+
+	// Override to handle Enter key when no suggestions match
+	selectSuggestion(value: string, evt: KeyboardEvent | MouseEvent) {
+		if (evt instanceof KeyboardEvent && evt.key === 'Enter') {
+			// Check if there are any suggestions
+			const suggestions = this.getSuggestions(this.inputEl.value);
+			if (suggestions.length === 0) {
+				// No suggestions available - send current input as prompt
+				const input = this.inputEl.value.trim();
+				if (input) {
+					this.sendPrompt(input);
+					return;
+				}
+			}
+		}
+		// Use default behavior for suggestion selection
+		super.selectSuggestion(value, evt);
+	}
+
+	onOpen() {
+		super.onOpen();
+		this.setPlaceholder(translate("placeholder.prompt-input"));
+		this.setInstructions([
+			{ command: "↑↓", purpose: "Navigate" },
+			{ command: "↵", purpose: "Select or send" },
+			{ command: "esc", purpose: "Close" }
+		]);
+	}
+
+	async sendPrompt(customPrompt?: string) {
+		const prompt = customPrompt || this.inputEl.value.trim();
 		if (!prompt) {
 			new Notice("Please enter a prompt.");
 			return;
 		}
 
-		this.promptInput.disabled = true;
-		this.promptInput.placeholder = translate(
-			"placeholder.generating-response",
-		);
+		this.inputEl.disabled = true;
+		this.setPlaceholder("Processing...");
 
 		try {
 			this.plugin.build_api();
@@ -77,6 +87,9 @@ export class AIPromptModal extends Modal {
 				new Notice("Please configure your API settings first.");
 				return;
 			}
+
+			// Add prompt to history
+			this.plugin.addToPromptHistory(prompt);
 
 			// Make the API call
 			const messages = [
@@ -104,18 +117,11 @@ export class AIPromptModal extends Modal {
 			new Notice(`Error: ${error.message || "Failed to get AI response"}.`);
 		} finally {
 			// Re-enable input
-			this.promptInput.disabled = false;
-			this.promptInput.placeholder = translate(
-				"placeholder.prompt-input",
-			);
+			this.inputEl.disabled = false;
+			this.setPlaceholder(translate("placeholder.prompt-input"));
 			// Clear input for next prompt
-			this.promptInput.value = "";
+			this.inputEl.value = "";
 		}
-	}
-
-	onClose() {
-		const { contentEl } = this;
-		contentEl.empty();
 	}
 }
 
@@ -132,11 +138,11 @@ export class EditSuggestionModal extends Modal {
 		option: ImprovementOption,
 		onSave: (updatedOption: ImprovementOption) => void,
 		onDelete?: (optionId: string) => void,
-		title: string = "Edit Prompt", // Changed from "Edit Suggestion"
+		title: string = "Edit Prompt",
 	) {
 		super(app);
 		this.plugin = plugin;
-		this.option = { ...option }; // Create a copy
+		this.option = { ...option };
 		this.onSave = onSave;
 		this.onDelete = onDelete;
 		this.title = title;
@@ -183,7 +189,7 @@ export class EditSuggestionModal extends Modal {
 		buttonContainer.addClass("vibe-writing-button-row");
 		buttonContainer.addClass("vibe-writing-gap-10");
 
-		// Delete button with plain styling (if available)
+		// Delete button
 		if (this.onDelete) {
 			const deleteButton = buttonContainer.createEl("button", {
 				text: translate("ui.delete"),
@@ -203,7 +209,7 @@ export class EditSuggestionModal extends Modal {
 			};
 		}
 
-		// Save button with accent styling
+		// Save button
 		const saveButton = buttonContainer.createEl("button", {
 			text: translate("ui.save"),
 		});

@@ -6651,7 +6651,8 @@ var DEFAULT_SETTINGS = {
   suggestions: [],
   imageCompressionQuality: 0.8,
   imageMaxWidth: 1920,
-  imageMaxHeight: 1080
+  imageMaxHeight: 1080,
+  promptHistory: []
 };
 
 // src/modals.ts
@@ -6951,57 +6952,66 @@ function initializeLanguage(language) {
 }
 
 // src/modals.ts
-var AIPromptModal = class extends import_obsidian2.Modal {
+var AIPromptModal = class extends import_obsidian2.SuggestModal {
   constructor(app, plugin, editor) {
     super(app);
     this.plugin = plugin;
     this.editor = editor;
   }
-  onOpen() {
-    const { contentEl } = this;
-    contentEl.empty();
-    contentEl.addClass("vibe-writing-ai-prompt-modal");
-    const title = contentEl.createEl("h2", {
-      text: translate("command.one-shot-chat")
-    });
-    title.addClass("vibe-writing-mb-10");
-    const promptContainer = contentEl.createDiv();
-    this.promptInput = promptContainer.createEl("input", {
-      type: "text",
-      placeholder: translate("placeholder.prompt-input")
-    });
-    this.promptInput.addClass("vibe-writing-full-width");
-    this.promptInput.addClass("vibe-writing-mb-10");
-    setTimeout(() => {
-      this.promptInput.focus();
-    }, 100);
-    this.promptInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        this.sendPrompt();
-      }
-      if (e.key === "Escape") {
-        e.preventDefault();
-        this.close();
-      }
-    });
+  getSuggestions(query) {
+    const history = this.plugin.settings.promptHistory;
+    if (query.length === 0) {
+      return history.map((item) => item.text);
+    } else {
+      return history.filter((item) => item.text.toLowerCase().includes(query.toLowerCase())).map((item) => item.text);
+    }
   }
-  async sendPrompt() {
-    const prompt = this.promptInput.value.trim();
+  renderSuggestion(prompt, el) {
+    el.createEl("div", { text: prompt });
+  }
+  onChooseSuggestion(prompt, evt) {
+    this.sendPrompt(prompt);
+  }
+  onNoSuggestion() {
+  }
+  // Override to handle Enter key when no suggestions match
+  selectSuggestion(value, evt) {
+    if (evt instanceof KeyboardEvent && evt.key === "Enter") {
+      const suggestions = this.getSuggestions(this.inputEl.value);
+      if (suggestions.length === 0) {
+        const input = this.inputEl.value.trim();
+        if (input) {
+          this.sendPrompt(input);
+          return;
+        }
+      }
+    }
+    super.selectSuggestion(value, evt);
+  }
+  onOpen() {
+    super.onOpen();
+    this.setPlaceholder(translate("placeholder.prompt-input"));
+    this.setInstructions([
+      { command: "\u2191\u2193", purpose: "Navigate" },
+      { command: "\u21B5", purpose: "Select or send" },
+      { command: "esc", purpose: "Close" }
+    ]);
+  }
+  async sendPrompt(customPrompt) {
+    const prompt = customPrompt || this.inputEl.value.trim();
     if (!prompt) {
       new import_obsidian2.Notice("Please enter a prompt.");
       return;
     }
-    this.promptInput.disabled = true;
-    this.promptInput.placeholder = translate(
-      "placeholder.generating-response"
-    );
+    this.inputEl.disabled = true;
+    this.setPlaceholder("Processing...");
     try {
       this.plugin.build_api();
       if (!this.plugin.aiAssistant) {
         new import_obsidian2.Notice("Please configure your API settings first.");
         return;
       }
+      this.plugin.addToPromptHistory(prompt);
       const messages = [
         {
           role: "user",
@@ -7029,16 +7039,10 @@ var AIPromptModal = class extends import_obsidian2.Modal {
       console.error("AI API Error:", error);
       new import_obsidian2.Notice(`Error: ${error.message || "Failed to get AI response"}.`);
     } finally {
-      this.promptInput.disabled = false;
-      this.promptInput.placeholder = translate(
-        "placeholder.prompt-input"
-      );
-      this.promptInput.value = "";
+      this.inputEl.disabled = false;
+      this.setPlaceholder(translate("placeholder.prompt-input"));
+      this.inputEl.value = "";
     }
-  }
-  onClose() {
-    const { contentEl } = this;
-    contentEl.empty();
   }
 };
 var EditSuggestionModal = class extends import_obsidian2.Modal {
@@ -7697,6 +7701,24 @@ var AiAssistantPlugin = class extends import_obsidian6.Plugin {
   }
   async saveSettings() {
     await this.saveData(this.settings);
+  }
+  addToPromptHistory(prompt) {
+    const trimmedPrompt = prompt.trim();
+    if (!trimmedPrompt) return;
+    const history = this.settings.promptHistory;
+    const existingIndex = history.findIndex((item) => item.text === trimmedPrompt);
+    if (existingIndex !== -1) {
+      history[existingIndex].usageCount++;
+      history[existingIndex].lastUsed = Date.now();
+    } else {
+      history.push({
+        text: trimmedPrompt,
+        usageCount: 1,
+        lastUsed: Date.now()
+      });
+    }
+    history.sort((a, b) => b.usageCount - a.usageCount);
+    this.saveSettings();
   }
   getDefaultSuggestions() {
     return [
