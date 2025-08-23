@@ -27,6 +27,7 @@ export interface AiAssistantSettings {
 	imageMaxWidth: number;
 	imageMaxHeight: number;
 	promptHistory: PromptHistoryItem[];
+	defaultAiResponseNote: string;
 }
 
 export const DEFAULT_SETTINGS: AiAssistantSettings = {
@@ -46,6 +47,7 @@ export const DEFAULT_SETTINGS: AiAssistantSettings = {
 	imageMaxWidth: 1920,
 	imageMaxHeight: 1080,
 	promptHistory: [],
+	defaultAiResponseNote: "",
 };
 
 export interface ImprovementOption {

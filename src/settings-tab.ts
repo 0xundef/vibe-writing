@@ -84,6 +84,32 @@ export class AiAssistantSettingTab extends PluginSettingTab {
 					}),
 			);
 
+		// Add Default AI Response Note setting
+		new Setting(containerEl)
+			.setName("Default AI Response Note")
+			.setDesc("The note where AI responses will be written. Use the command 'Set default note for AI responses' to select a note.")
+			.addText((text) => {
+				const defaultNotePath = this.plugin.settings.defaultAiResponseNote;
+				const displayText = defaultNotePath ? 
+					this.app.vault.getAbstractFileByPath(defaultNotePath)?.name || defaultNotePath :
+					"None selected";
+				
+				text
+					.setPlaceholder("No default note set")
+					.setValue(displayText)
+					.setDisabled(true); // Make it read-only
+			})
+			.addButton((button) => {
+				button
+					.setButtonText("Clear")
+					.setTooltip("Clear the default AI response note")
+					.onClick(async () => {
+						this.plugin.settings.defaultAiResponseNote = "";
+						await this.plugin.saveSettings();
+						this.display(); // Refresh the settings display
+					});
+			});
+
 		containerEl.createEl("h3", { text: "Support the project" });
 		const supportDesc = containerEl.createEl("p", {
 			text: "If you find Vibe Writing helpful, consider supporting its development:",

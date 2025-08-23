@@ -6652,7 +6652,8 @@ var DEFAULT_SETTINGS = {
   imageCompressionQuality: 0.8,
   imageMaxWidth: 1920,
   imageMaxHeight: 1080,
-  promptHistory: []
+  promptHistory: [],
+  defaultAiResponseNote: ""
 };
 
 // src/modals.ts
@@ -7041,8 +7042,13 @@ ${selectedText}`;
         }
       ];
       const response = await this.plugin.aiAssistant.text_api_call(messages);
-      if (response && this.editor) {
-        const quoteBlock = `
+      if (response) {
+        const defaultNotePath = this.plugin.settings.defaultAiResponseNote;
+        if (defaultNotePath) {
+          const defaultFile = this.app.vault.getAbstractFileByPath(defaultNotePath);
+          if (defaultFile && defaultFile instanceof import_obsidian2.TFile) {
+            const fileContent = await this.app.vault.read(defaultFile);
+            const quoteBlock = `
 
 > [!quote]+ AI Response(shot chat)
 > **Q:** ${prompt.trim().replace(/\n/g, "\n> ")}
@@ -7050,9 +7056,39 @@ ${selectedText}`;
 > **A:** ${response.trim().replace(/\n/g, "\n> ")}
 
 `;
-        const cursor = this.editor.getCursor();
-        this.editor.replaceRange(quoteBlock, cursor, cursor);
-        new import_obsidian2.Notice("AI response inserted at cursor position.");
+            const newContent = fileContent + quoteBlock;
+            await this.app.vault.modify(defaultFile, newContent);
+            new import_obsidian2.Notice(`AI response added to ${defaultFile.basename}`);
+          } else {
+            new import_obsidian2.Notice("Default AI response note not found. Using current editor.");
+            if (this.editor) {
+              const quoteBlock = `
+
+> [!quote]+ AI Response(shot chat)
+> **Q:** ${prompt.trim().replace(/\n/g, "\n> ")}
+> 
+> **A:** ${response.trim().replace(/\n/g, "\n> ")}
+
+`;
+              const cursor = this.editor.getCursor();
+              this.editor.replaceRange(quoteBlock, cursor, cursor);
+            }
+          }
+        } else if (this.editor) {
+          const quoteBlock = `
+
+> [!quote]+ AI Response(shot chat)
+> **Q:** ${prompt.trim().replace(/\n/g, "\n> ")}
+> 
+> **A:** ${response.trim().replace(/\n/g, "\n> ")}
+
+`;
+          const cursor = this.editor.getCursor();
+          this.editor.replaceRange(quoteBlock, cursor, cursor);
+          new import_obsidian2.Notice("AI response inserted at cursor position.");
+        } else {
+          new import_obsidian2.Notice("No editor available and no default note set.");
+        }
         this.close();
       } else {
         new import_obsidian2.Notice("No response from AI. Please try again.");
@@ -7453,6 +7489,18 @@ var AiAssistantSettingTab = class extends import_obsidian5.PluginSettingTab {
         await this.plugin.saveSettings();
       })
     );
+    new import_obsidian5.Setting(containerEl).setName("Default AI Response Note").setDesc("The note where AI responses will be written. Use the command 'Set default note for AI responses' to select a note.").addText((text) => {
+      var _a2;
+      const defaultNotePath = this.plugin.settings.defaultAiResponseNote;
+      const displayText = defaultNotePath ? ((_a2 = this.app.vault.getAbstractFileByPath(defaultNotePath)) == null ? void 0 : _a2.name) || defaultNotePath : "None selected";
+      text.setPlaceholder("No default note set").setValue(displayText).setDisabled(true);
+    }).addButton((button) => {
+      button.setButtonText("Clear").setTooltip("Clear the default AI response note").onClick(async () => {
+        this.plugin.settings.defaultAiResponseNote = "";
+        await this.plugin.saveSettings();
+        this.display();
+      });
+    });
     containerEl.createEl("h3", { text: "Support the project" });
     const supportDesc = containerEl.createEl("p", {
       text: "If you find Vibe Writing helpful, consider supporting its development:",
@@ -7687,8 +7735,8 @@ var AiAssistantPlugin = class extends import_obsidian6.Plugin {
         }
       });
       this.addCommand({
-        id: "split-right-with-note",
-        name: "Split right and open specified note",
+        id: "set-default-ai-note",
+        name: "Set default note for AI responses",
         callback: async () => {
           const modal = new FileSuggesterModal(this.app, this);
           modal.open();
@@ -7946,6 +7994,12 @@ var AiAssistantPlugin = class extends import_obsidian6.Plugin {
       workspace.getLeaf("split", "vertical").openFile(file);
     }
   }
+  setDefaultAiResponseNote(file) {
+    this.settings.defaultAiResponseNote = file.path;
+    this.saveSettings();
+    new import_obsidian6.Notice(`Default AI response note set to: ${file.basename}`);
+    this.splitRightAndOpenNote(file);
+  }
 };
 var FileSuggesterModal = class extends import_obsidian6.SuggestModal {
   constructor(app, plugin) {
@@ -7964,6 +8018,7 @@ var FileSuggesterModal = class extends import_obsidian6.SuggestModal {
     el.createEl("small", { text: file.path, cls: "suggestion-note" });
   }
   onChooseSuggestion(file) {
-    this.plugin.splitRightAndOpenNote(file);
+    this.plugin.setDefaultAiResponseNote(file);
+    this.close();
   }
 };

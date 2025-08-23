@@ -285,10 +285,10 @@ export default class AiAssistantPlugin extends Plugin {
 				},
 			});
 
-			// Add command to split right and open specified note
+			// Add command to set default AI response note
 			this.addCommand({
-				id: "split-right-with-note",
-				name: "Split right and open specified note",
+				id: "set-default-ai-note",
+				name: "Set default note for AI responses",
 				callback: async () => {
 					const modal = new FileSuggesterModal(this.app, this);
 					modal.open();
@@ -634,6 +634,15 @@ export default class AiAssistantPlugin extends Plugin {
 			workspace.getLeaf('split', 'vertical').openFile(file);
 		}
 	}
+
+	setDefaultAiResponseNote(file: TFile) {
+		this.settings.defaultAiResponseNote = file.path;
+		this.saveSettings();
+		new Notice(`Default AI response note set to: ${file.basename}`);
+		
+		// Also split right and open the note
+		this.splitRightAndOpenNote(file);
+	}
 }
 
 class FileSuggesterModal extends SuggestModal<TFile> {
@@ -658,6 +667,7 @@ class FileSuggesterModal extends SuggestModal<TFile> {
 	}
 
 	onChooseSuggestion(file: TFile): void {
-		this.plugin.splitRightAndOpenNote(file);
+		this.plugin.setDefaultAiResponseNote(file);
+		this.close();
 	}
 }

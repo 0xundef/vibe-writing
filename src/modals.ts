@@ -1,4 +1,4 @@
-import { App, Modal, Notice, SuggestModal, setIcon } from "obsidian";
+import { App, Modal, Notice, SuggestModal, setIcon, TFile } from "obsidian";
 import type AiAssistantPlugin from "./main";
 import { ImprovementOption, PromptHistoryItem } from "./types";
 import { translate } from "./i18n/language-manager";
@@ -125,13 +125,40 @@ export class AIPromptModal extends SuggestModal<string> {
 
 			const response = await this.plugin.aiAssistant.text_api_call(messages);
 
-			if (response && this.editor) {
-				// Insert AI response at cursor position wrapped in quote block with question
-				const quoteBlock = `\n\n> [!quote]+ AI Response(shot chat)\n> **Q:** ${prompt.trim().replace(/\n/g, "\n> ")}\n> \n> **A:** ${response.trim().replace(/\n/g, "\n> ")}\n\n`;
-				const cursor = this.editor.getCursor();
-				this.editor.replaceRange(quoteBlock, cursor, cursor);
+			if (response) {
+				// Check if there's a default AI response note set
+				const defaultNotePath = this.plugin.settings.defaultAiResponseNote;
 				
-				new Notice("AI response inserted at cursor position.");
+				if (defaultNotePath) {
+					// Write to the default note
+					const defaultFile = this.app.vault.getAbstractFileByPath(defaultNotePath);
+					if (defaultFile && defaultFile instanceof TFile) {
+						// Get the file content and append the AI response
+						const fileContent = await this.app.vault.read(defaultFile);
+						const quoteBlock = `\n\n> [!quote]+ AI Response(shot chat)\n> **Q:** ${prompt.trim().replace(/\n/g, "\n> ")}\n> \n> **A:** ${response.trim().replace(/\n/g, "\n> ")}\n\n`;
+						const newContent = fileContent + quoteBlock;
+						await this.app.vault.modify(defaultFile, newContent);
+						
+						new Notice(`AI response added to ${defaultFile.basename}`);
+					} else {
+						new Notice("Default AI response note not found. Using current editor.");
+						// Fallback to current editor
+						if (this.editor) {
+							const quoteBlock = `\n\n> [!quote]+ AI Response(shot chat)\n> **Q:** ${prompt.trim().replace(/\n/g, "\n> ")}\n> \n> **A:** ${response.trim().replace(/\n/g, "\n> ")}\n\n`;
+							const cursor = this.editor.getCursor();
+							this.editor.replaceRange(quoteBlock, cursor, cursor);
+						}
+					}
+				} else if (this.editor) {
+					// No default note set, use current editor
+					const quoteBlock = `\n\n> [!quote]+ AI Response(shot chat)\n> **Q:** ${prompt.trim().replace(/\n/g, "\n> ")}\n> \n> **A:** ${response.trim().replace(/\n/g, "\n> ")}\n\n`;
+					const cursor = this.editor.getCursor();
+					this.editor.replaceRange(quoteBlock, cursor, cursor);
+					new Notice("AI response inserted at cursor position.");
+				} else {
+					new Notice("No editor available and no default note set.");
+				}
+				
 				this.close();
 			} else {
 				new Notice("No response from AI. Please try again.");
