@@ -7,6 +7,7 @@ export const en: Translations = {
   'command.new-prompt': 'New prompt',
   'command.one-shot-chat': 'Shot chat',
   'command.replace-ai-response': 'Replace with last AI response',
+  'command.tidy-history': 'Tidy history',
   
   // Notices
   'notice.no-selection': 'No previous selection found. Please select some text first.',

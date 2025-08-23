@@ -6665,6 +6665,7 @@ var en = {
   "command.new-prompt": "New prompt",
   "command.one-shot-chat": "Shot chat",
   "command.replace-ai-response": "Replace with last AI response",
+  "command.tidy-history": "Tidy history",
   // Notices
   "notice.no-selection": "No previous selection found. Please select some text first.",
   "notice.name-prompt-empty": "Name and prompt cannot be empty!",
@@ -6770,6 +6771,7 @@ var zh = {
   "command.new-prompt": "\u65B0\u5EFA\u63D0\u793A",
   "command.one-shot-chat": "\u5355\u6B21\u5BF9\u8BDD",
   "command.replace-ai-response": "\u66FF\u6362\u4E3A\u4E0A\u6B21AI\u56DE\u590D",
+  "command.tidy-history": "\u6574\u7406\u5386\u53F2",
   // Notices
   "notice.no-selection": "\u672A\u627E\u5230\u4E4B\u524D\u7684\u9009\u62E9\u3002\u8BF7\u5148\u9009\u62E9\u4E00\u4E9B\u6587\u672C\u3002",
   "notice.name-prompt-empty": "\u540D\u79F0\u548C\u63D0\u793A\u4E0D\u80FD\u4E3A\u7A7A\uFF01",
@@ -7018,15 +7020,14 @@ var AIPromptModal = class extends import_obsidian2.Modal {
       ];
       const response = await this.plugin.aiAssistant.text_api_call(messages);
       if (response && this.editor) {
-        const codeBlock = `
+        const quoteBlock = `
 
-\`\`\`
-${response.trim()}
-\`\`\`
+> [!quote]+ AI Response
+> ${response.trim().replace(/\n/g, "\n> ")}
 
 `;
         const cursor = this.editor.getCursor();
-        this.editor.replaceRange(codeBlock, cursor, cursor);
+        this.editor.replaceRange(quoteBlock, cursor, cursor);
         new import_obsidian2.Notice("AI response inserted at cursor position.");
         this.close();
       } else {
@@ -7588,6 +7589,42 @@ var AiAssistantPlugin = class extends import_obsidian6.Plugin {
             activeView.editor
           );
           aiModal.open();
+        }
+      });
+      this.addCommand({
+        id: "tidy-history",
+        name: translate("command.tidy-history"),
+        callback: async () => {
+          const activeView = this.app.workspace.getActiveViewOfType(import_obsidian6.MarkdownView);
+          if (!activeView || !activeView.editor) {
+            new import_obsidian6.Notice("No active markdown view found.");
+            return;
+          }
+          const editor = activeView.editor;
+          const content = editor.getValue();
+          const lines = content.split("\n");
+          let removedCount = 0;
+          let i = 0;
+          while (i < lines.length) {
+            const line = lines[i];
+            if (line.match(/^>\s*\[!quote\]\+?\s*AI Response/)) {
+              const startIndex = i;
+              while (i < lines.length && (lines[i].startsWith(">") || lines[i].trim() === "")) {
+                i++;
+              }
+              lines.splice(startIndex, i - startIndex);
+              i = startIndex;
+              removedCount++;
+            } else {
+              i++;
+            }
+          }
+          if (removedCount > 0) {
+            editor.setValue(lines.join("\n"));
+            new import_obsidian6.Notice(`Removed ${removedCount} AI response quote block(s).`);
+          } else {
+            new import_obsidian6.Notice("No AI response quote blocks found.");
+          }
         }
       });
       this.addCommand({

@@ -170,6 +170,56 @@ export default class AiAssistantPlugin extends Plugin {
 				},
 			});
 			
+			// Add command to tidy history (remove all AI response quote blocks)
+			this.addCommand({
+				id: "tidy-history",
+				name: translate("command.tidy-history"),
+				callback: async () => {
+					const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
+					if (!activeView || !activeView.editor) {
+						new Notice("No active markdown view found.");
+						return;
+					}
+					
+					const editor = activeView.editor;
+					const content = editor.getValue();
+					const lines = content.split('\n');
+					
+					let removedCount = 0;
+					let i = 0;
+					
+					// Process lines to find and remove AI response quote blocks
+					while (i < lines.length) {
+						const line = lines[i];
+						
+						// Check if this line starts an AI response quote block
+						if (line.match(/^>\s*\[!quote\]\+?\s*AI Response/)) {
+							const startIndex = i;
+							
+							// Find the end of the quote block
+							while (i < lines.length && (lines[i].startsWith('>') || lines[i].trim() === '')) {
+								i++;
+							}
+							
+							// Remove the quote block lines
+							lines.splice(startIndex, i - startIndex);
+							i = startIndex;
+							removedCount++;
+						} else {
+							i++;
+						}
+					}
+					
+					// Update the editor content
+					if (removedCount > 0) {
+						editor.setValue(lines.join('\n'));
+						new Notice(`Removed ${removedCount} AI response quote block(s).`);
+					} else {
+						new Notice("No AI response quote blocks found.");
+					}
+				},
+			});
+			
 			// Add command to replace original text with last AI response
 			this.addCommand({
 				id: "replace-with-ai",

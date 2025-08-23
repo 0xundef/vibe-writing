@@ -7,6 +7,7 @@ export const zh: Translations = {
   'command.new-prompt': '新建提示',
   'command.one-shot-chat': '单次对话',
   'command.replace-ai-response': '替换为上次AI回复',
+  'command.tidy-history': '整理历史',
   
   // Notices
   'notice.no-selection': '未找到之前的选择。请先选择一些文本。',

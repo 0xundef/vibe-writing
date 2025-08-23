@@ -5,6 +5,7 @@ export interface Translations {
   'command.new-prompt': string;
   'command.one-shot-chat': string;
   'command.replace-ai-response': string;
+  'command.tidy-history': string;
   
   // Notices
   'notice.no-selection': string;
